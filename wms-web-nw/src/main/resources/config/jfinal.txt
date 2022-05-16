@@ -1,0 +1,33 @@
+#jfinal
+jfinal.devMode = true
+jfinal.generateTestData = true
+
+#SPD
+spd = true
+spd.lastDays = 7
+spd.defaultUserId = 1
+spd.deptName=手术麻醉中心,SPD院内运营中心
+
+#mysql-wms
+wms.url = jdbc:mysql://39.107.46.205:3306/wms_nw?characterEncoding=utf8&useSSL=false&zeroDateTimeBehavior=convertToNull&tinyInt1isBit=false
+wms.user = root
+wms.password = 123456
+
+#switch
+switch.imageRotate=0
+
+#password
+password=123456
+
+#http
+SPD_BASE_URL = http://10.82.146.26:8867/api/v1
+
+#TagPrefix
+UserTagPrefix=AAA
+GoodsTagPrefix=474B4854
+
+#hikvision
+#hk.C001=192.168.2.64,8000,admin,tsj123456;192.168.2.65,8000,admin,tsj123456
+
+#hospitalName
+hospitalName=唐山工人医院

@@ -1,0 +1,21 @@
+cron4j=removeTemp,spdReissue,dbBackup
+
+#removeTemp【每天晚上2点执行】
+removeTemp.cron=0 2 * * *
+removeTemp.class=com.tsj.service.schedule.RemoveTemp
+removeTemp.enable=true
+
+#spdReissue【每隔5分钟执行】
+spdReissue.cron=*/5 * * * *
+spdReissue.class=com.tsj.service.schedule.SpdReissue
+spdReissue.enable=true
+
+#dbBackup【每天晚上3点执行】
+dbBackup.cron=0 3 * * *
+dbBackup.class=com.tsj.service.schedule.DbBackup
+dbBackup.enable=true
+
+#autoCheckHikvision【每分钟执行】
+autoCheckHikvision.cron=*/1 * * * *
+autoCheckHikvision.class=com.tsj.web.task.AutoCheckHikvision
+autoCheckHikvision.enable=true
