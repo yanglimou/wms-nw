@@ -2,6 +2,7 @@ package com.tsj.web;
 
 import com.jfinal.server.undertow.UndertowServer;
 import com.tsj.web.common.MyConfig;
+import com.tsj.web.websocket.MyWebSocket;
 
 /**
  * @className: Application
@@ -11,6 +12,8 @@ import com.tsj.web.common.MyConfig;
  */
 public class Application {
     public static void main(String[] args) {
-        UndertowServer.create(MyConfig.class, "config/undertow.txt").start();
+        UndertowServer.create(MyConfig.class, "config/undertow.txt").configWeb(builder -> {
+            builder.addWebSocketEndpoint(MyWebSocket.class);
+        }).start();
     }
 }

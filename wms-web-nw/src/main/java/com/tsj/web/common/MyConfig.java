@@ -15,6 +15,7 @@ import com.jfinal.plugin.druid.DruidPlugin;
 import com.jfinal.plugin.druid.DruidStatViewHandler;
 import com.jfinal.plugin.ehcache.EhCachePlugin;
 import com.jfinal.template.Engine;
+import com.tsj.common.config.CommonConfig;
 import com.tsj.common.constant.FileConstant;
 import com.tsj.common.druid.DruidConfig;
 import com.tsj.common.log.LogBackLogFactory;
@@ -22,22 +23,15 @@ import com.tsj.common.threadpool.ThreadPoolPlugin;
 import com.tsj.domain.model.Dept;
 import com.tsj.domain.model._MappingKit;
 import com.tsj.service.CacheService;
-import com.tsj.common.config.CommonConfig;
-import com.tsj.service.SpdService;
 import com.tsj.service.interceptor.AuthInterceptor;
 import com.tsj.service.interceptor.EmptyInterceptor;
 import com.tsj.service.interceptor.OperateLogInterceptor;
 import com.tsj.web.controller.*;
-import com.tsj.web.controller.api.ApiSysController;
-import com.tsj.web.hikvision.HikVision;
-import net.dreamlu.event.EventPlugin;
 import com.tsj.web.controller.api.ApiBaseController;
 import com.tsj.web.controller.api.ApiComController;
+import com.tsj.web.controller.api.ApiSysController;
+import net.dreamlu.event.EventPlugin;
 import org.apache.commons.lang3.StringUtils;
-
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
 
 /**
  * @className: CoreConfig
@@ -187,24 +181,24 @@ public class MyConfig extends JFinalConfig {
         cacheService.initCache();
 
         //连接海康摄像头
-        Enumeration<?> enu = CommonConfig.prop.getProperties().keys();
-        while (enu.hasMoreElements()) {
-            String key = enu.nextElement().toString();
-            if (key.startsWith("hk.")) {
-                String[] strings = CommonConfig.prop.get(key).split(";");
-
-                List<String> addressList = new ArrayList<>();
-                for (String string : strings) {
-                    String[] params = string.split(",");
-                    boolean res = HikVision.RealPlay(params[0], Short.parseShort(params[1]), params[2], params[3]);
-                    if (res) {
-                        addressList.add(params[0]);
-                    }
-                }
-
-                CommonConfig.cabinetCameraAddressMap.put(key.substring(3), addressList);
-            }
-        }
+//        Enumeration<?> enu = CommonConfig.prop.getProperties().keys();
+//        while (enu.hasMoreElements()) {
+//            String key = enu.nextElement().toString();
+//            if (key.startsWith("hk.")) {
+//                String[] strings = CommonConfig.prop.get(key).split(";");
+//
+//                List<String> addressList = new ArrayList<>();
+//                for (String string : strings) {
+//                    String[] params = string.split(",");
+//                    boolean res = HikVision.RealPlay(params[0], Short.parseShort(params[1]), params[2], params[3]);
+//                    if (res) {
+//                        addressList.add(params[0]);
+//                    }
+//                }
+//
+//                CommonConfig.cabinetCameraAddressMap.put(key.substring(3), addressList);
+//            }
+//        }
 
         String deptNames = CommonConfig.prop.get("spd.deptName");
         if (StringUtils.isNotEmpty(deptNames)) {
@@ -220,6 +214,6 @@ public class MyConfig extends JFinalConfig {
         super.onStop();
 
         //断开海康摄像头
-        HikVision.StopRealPlay();
+//        HikVision.StopRealPlay();
     }
 }
