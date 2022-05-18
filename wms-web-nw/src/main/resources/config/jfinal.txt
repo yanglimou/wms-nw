@@ -33,4 +33,4 @@ GoodsTagPrefix=474B4854
 #hk.C001=192.168.2.64,8000,admin,tsj123456;192.168.2.65,8000,admin,tsj123456
 
 #hospitalName
-hospitalName=唐山工人医院
+hospitalName=南方医科大学附属第五医院
