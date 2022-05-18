@@ -43,28 +43,29 @@ public class PrintController extends MyController {
         JSONObject requestObject = JSON.parseObject(rawData);
         //处理高值
         JSONObject high = requestObject.getJSONObject("high");
-        handle(high);
+        handle(high,true);
         //处理低值
         JSONObject low = requestObject.getJSONObject("low");
-        handle(low);
+        handle(low,false);
         renderJson(R.ok().putData("success"));
     }
 
-    private void handle(JSONObject high) {
+    private void handle(JSONObject high, boolean isHighFlag) {
         String id = high.getString("id");
         JSONArray printRequests = new JSONArray();
         high.getJSONArray("data").stream().map(o -> (JSONObject) o).forEach(jsonObject -> {
             JSONObject printRequest = new JSONObject();
             printRequest.put("name", jsonObject.getString("name"));
-            printRequest.put("spec", "规格：" + jsonObject.getString("spec"));
-            printRequest.put("manufacturerName", "厂家：" + jsonObject.getString("manufacturerName"));
-            printRequest.put("lotNo", "批号：" + jsonObject.getString("lotNo"));
-            printRequest.put("expireDate", "有效期：" + jsonObject.getString("expireDate").substring(0, 10));
-            printRequest.put("shelfName", jsonObject.getString("shelfName"));
+            printRequest.put("spec", jsonObject.getString("spec"));
+            printRequest.put("manufacturerName", jsonObject.getString("manufacturerName"));
+            printRequest.put("lotNo", jsonObject.getString("lotNo"));
+            printRequest.put("expireDate", jsonObject.getString("expireDate").substring(0, 10));
+            printRequest.put("shelfCode", jsonObject.getString("shelfCode"));
             printRequest.put("comGoodsId", jsonObject.getString("comGoodsId"));
             printRequest.put("caseNbr", jsonObject.getString("caseNbr"));
             printRequest.put("rfid", jsonObject.getString("epc"));
-            printRequest.put("unit", "1[" + jsonObject.getString("unit") + "]");
+            printRequest.put("unit", jsonObject.getString("unit"));
+            printRequest.put("highFlag", isHighFlag?"H":"L");
             printRequests.add(printRequest);
             Db.update("update print set printFlag=1 , userId=? where caseNbr=?", getLoginUserId(), jsonObject.getString("caseNbr"));
         });
