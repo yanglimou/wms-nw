@@ -30,7 +30,7 @@
                 <input type="text" class="layui-input" id="dateRange" placeholder="选择时间范围">
             </div>
             <div class="layui-input-inline">
-                <select id="printer">
+                <select id="print">
                     <option value="1032">未打印</option>
                     <option value="1030">已打印</option>
                     <option value="">选择标签打印状态</option>
@@ -55,7 +55,7 @@
 
     <!-- 操作 -->
     <script type="text/html" id="recordMaterialListBar">
-            <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="printer"><i class="layui-icon">&#xe66e;</i>打印</a>
+            <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="print"><i class="layui-icon">&#xe66e;</i>打印</a>
     </script>
 
     <script type="text/javascript" src="../../layui/layui.all.js"></script>
@@ -107,8 +107,8 @@
                     { type: 'checkbox', fixed: 'left', align: "center" }
                     , { type: 'numbers', title: '序号' }
                     , {
-                        field: 'printer', title: '打印状态', align: "center", width: 120, templet: function (d) {
-                            if (d.printer == 1030) {
+                        field: 'print', title: '打印状态', align: "center", width: 120, templet: function (d) {
+                            if (d.print == 1030) {
                                 return "<i class='layui-icon' style='color:green;margin-right:5px'>&#xe617;</i>已打印";
                             } else {
                                 return "<i class='layui-icon' style='color:red;margin-right:5px'>&#xe617;</i>未打印";
@@ -182,8 +182,8 @@
                 var tr = obj.tr; //获得当前行 tr 的DOM对象
 
                 switch (obj.event) {
-                    case 'printer':
-                        printer(data);
+                    case 'print':
+                        print(data);
                         break;
                 }
             });
@@ -199,7 +199,7 @@
                     , where: {
                         orderCreateCode: $('#orderCreateCode').val(),
                         productId: $('#productId').val(),
-                        printer: $('#printer').val(),
+                        print: $('#print').val(),
                         dateRange: $('#dateRange').val()
                     }
                 });
@@ -231,7 +231,7 @@
                             tagType: defaultTagType,
                             orderCreateCode: $('#orderCreateCode').val(),
                             productId: $('#productId').val(),
-                            printer: $('#printer').val(),
+                            print: $('#print').val(),
                             dateRange: $('#dateRange').val()
                         },
 
@@ -292,7 +292,7 @@
             }
 
             //单个打印
-            function printer(data) {
+            function print(data) {
                 var str = '打印定数包【' + data.spdUniqueCode + '】，是否确认打印？';
                 layer.confirm(str, { icon: 3, title: '提示信息' }, function (index) {
                     layer.close(index);
