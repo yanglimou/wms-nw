@@ -40,7 +40,7 @@ public class FileKit {
         // 查看文件夹是否存在,如果不存在则创建
         File dir = new File(filePath);
         if (!dir.exists()) {
-            dir.mkdir();
+            dir.mkdirs();
         }
 
         File file = uploadFile.getFile();
@@ -139,7 +139,7 @@ public class FileKit {
             }
             return true;
         } else {
-            boolean bl = new File(destFilePath).mkdir();
+            boolean bl = new File(destFilePath).mkdirs();
             if (!bl) {
                 logger.warn(destFilePath + " mkdir failed");
                 return false;

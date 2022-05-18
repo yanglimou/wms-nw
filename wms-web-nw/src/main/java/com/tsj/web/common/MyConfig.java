@@ -201,13 +201,13 @@ public class MyConfig extends JFinalConfig {
 //            }
 //        }
 
-        String deptNames = CommonConfig.prop.get("spd.deptName");
-        if (StringUtils.isNotEmpty(deptNames)) {
-            for (String deptName : deptNames.split(",")) {
-                Dept dept = cacheService.getDeptByName(deptName);
-                logger.info(deptName + "--" + dept.getId());
-            }
-        }
+//        String deptNames = CommonConfig.prop.get("spd.deptName");
+//        if (StringUtils.isNotEmpty(deptNames)) {
+//            for (String deptName : deptNames.split(",")) {
+//                Dept dept = cacheService.getDeptByName(deptName);
+//                logger.info(deptName + "--" + dept.getId());
+//            }
+//        }
     }
 
     @Override

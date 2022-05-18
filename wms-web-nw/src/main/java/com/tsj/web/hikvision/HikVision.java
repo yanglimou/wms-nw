@@ -132,7 +132,7 @@ public class HikVision {
         // 查看文件夹是否存在,如果不存在则创建
         File file = new File(localSaveFilePath);
         if (!file.exists()) {
-            file.mkdir();
+            file.mkdirs();
         }
 
         // 预览成功后 调用接口使视频资源保存到文件中 这是完整过程视频,如果需要打开注释即可

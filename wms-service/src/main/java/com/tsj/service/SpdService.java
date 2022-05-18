@@ -202,7 +202,7 @@ public class SpdService extends MyService {
         try {
             doPostBasicData(type);
         } catch (Exception ignored) {
-
+            logger.error("错误",ignored);
         }
         isRunning = false;
         return true;
@@ -218,7 +218,7 @@ public class SpdService extends MyService {
         boolean isGoods = type.equals("goods") || type.equals("all");
         boolean isMaterial = type.equals("material") || type.equals("all");
         boolean isPrint = type.equals("print") || type.equals("all");
-
+        logger.info("同步科室");
         //同步科室
         if (isDept) {
             List<Dept> saveList = new ArrayList<>();
@@ -255,7 +255,7 @@ public class SpdService extends MyService {
                 Db.batchUpdate(updateList, batchSize);
             }
         }
-
+        logger.info("同步人员");
         //同步人员
         if (isUser) {
             List<User> saveList = new ArrayList<>();
@@ -294,7 +294,7 @@ public class SpdService extends MyService {
                 Db.batchUpdate(updateList, batchSize);
             }
         }
-
+        logger.info("同步耗材");
         //同步耗材
         if (isGoods) {
             List<Goods> saveList = new ArrayList<>();
@@ -380,7 +380,7 @@ public class SpdService extends MyService {
                 Db.batchUpdate(updateList, batchSize);
             }
         }
-
+        logger.info("同步制标");
         //同步制标{退中心库的耗材唯一码会被重新使用，本地需要判断后覆盖}
         String deptNames = CommonConfig.prop.get("spd.deptName");
         if (isMaterial && StringUtils.isNotEmpty(deptNames)) {
@@ -527,7 +527,7 @@ public class SpdService extends MyService {
                 }
             }
         }
-
+        logger.info("同步打印");
         //同步打印
         if (isPrint) {
             List<Print> saveList = new ArrayList<>();
