@@ -1,11 +1,13 @@
 package com.tsj.service;
 
 import cn.hutool.core.date.DateUtil;
+import com.jfinal.aop.Aop;
 import com.jfinal.aop.Inject;
 import com.jfinal.kit.Kv;
 import com.jfinal.log.Log;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
+import com.tsj.common.config.CommonConfig;
 import com.tsj.common.constant.ResultCode;
 import com.tsj.common.constant.SpdUrl;
 import com.tsj.common.constant.SysConstant;
@@ -14,7 +16,6 @@ import com.tsj.common.utils.HttpKit;
 import com.tsj.common.utils.IDGenerator;
 import com.tsj.common.utils.R;
 import com.tsj.domain.model.*;
-import com.tsj.common.config.CommonConfig;
 import com.tsj.service.common.MyService;
 import org.apache.commons.lang3.StringUtils;
 
@@ -216,6 +217,7 @@ public class SpdService extends MyService {
         boolean isUser = type.equals("user") || type.equals("all");
         boolean isGoods = type.equals("goods") || type.equals("all");
         boolean isMaterial = type.equals("material") || type.equals("all");
+        boolean isPrint = type.equals("print") || type.equals("all");
 
         //同步科室
         if (isDept) {
@@ -431,6 +433,29 @@ public class SpdService extends MyService {
                 if (!updateList.isEmpty()) {
                     Db.batchUpdate(updateList, batchSize);
                 }
+                //TODO 自动绑定标签
+                List<String> orderCodeList = new ArrayList<>();
+                ComService comService = Aop.get(ComService.class);
+                saveList.forEach(material -> {
+
+                    //过滤相同的配送单号
+                    String orderCode = material.getOrderCode();
+                    if (orderCodeList.contains(orderCode)) {
+                        return;
+                    }
+                    orderCodeList.add(orderCode);
+
+                    //调用标签绑定
+                    List<Record> spdCodeList = Db.find("select spdCode from base_material where orderCode=?", orderCode);
+                    spdCodeList.forEach(item -> {
+                        String spdCode = item.get("spdCode");
+
+                        //TODO 表名替换为标签打印表
+                        Record record = Db.findById("print", spdCode);
+                        comService.saveTagEpc(spdCode, record.getStr("epc"), record.getStr("userId"));
+                    });
+                });
+
 
                 //TODO 自动创建配送单
                 List<Order> orderList = new ArrayList<>();
@@ -503,6 +528,45 @@ public class SpdService extends MyService {
             }
         }
 
+        //同步打印
+        if (isPrint) {
+            List<Print> saveList = new ArrayList<>();
+            List<Record> recordList = HttpKit.postSpdData(SPD_BASE_URL + SpdUrl.URL_PRINT.getUrl(), "MODIFYDATE",
+                    Kv.create());
+            logger.info("同步打印数量:" + recordList.size());
+            recordList.forEach(record -> {
+                //新增三个参数
+                String CASE_NBR = record.getStr("CASE_NBR");
+                String ORDER_CODE = record.getStr("ORDER_CODE");
+                String COM_GOODS_ID = record.getStr("COM_GOODS_ID");
+                String LOT_NO = record.getStr("LOT_NO");
+                String EXPIRE_DATE = record.getStr("EXPIRE_DATE");
+                String DEPOT_ID = record.getStr("DEPOT_ID");
+                String SHELF_NAME = record.getStr("SHELF_NAME");
+                String SHELF_CODE = record.getStr("SHELF_CODE");
+                String ISHV = record.getStr("ISHV");
+                String CREATEDATE = record.getStr("CREATEDATE");
+                if (Print.dao.findById(CASE_NBR) == null) {
+                    Print print = new Print().setCaseNbr(CASE_NBR)
+                            .setEpc("474B485400" + CASE_NBR)
+                            .setOrderCode(ORDER_CODE)
+                            .setComGoodsId(COM_GOODS_ID)
+                            .setLotNo(LOT_NO)
+                            .setExpireDate(EXPIRE_DATE)
+                            .setDepotId(DEPOT_ID)
+                            .setShelfName(SHELF_NAME)
+                            .setShelfCode(SHELF_CODE)
+                            .setHvFlag(ISHV)
+                            .setCreateDate(CREATEDATE)
+                            .setPrintFlag("0");
+                    saveList.add(print);
+                }
+            });
+            // 批量新增
+            if (!saveList.isEmpty()) {
+                Db.batchSave(saveList, batchSize);
+            }
+        }
         logger.debug("postBasicData");
     }
 }

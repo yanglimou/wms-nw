@@ -38,6 +38,7 @@ public class _MappingKit {
         arp.addMapping("sys_log_spd", "id", LogSpd.class);
         arp.addMapping("sys_menu", "id", Menu.class);
         arp.addMapping("sys_user_finger", "id", UserFinger.class);
+        arp.addMapping("print", "caseNbr", Print.class);
     }
 }
 

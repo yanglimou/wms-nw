@@ -19,7 +19,7 @@
 
 <body class="childrenBody">
 
-    <div id="print-area" class="layui-col-md12 layui-col-xs12" style="text-align: center;font-weight:600;">
+    <div id="printer-area" class="layui-col-md12 layui-col-xs12" style="text-align: center;font-weight:600;">
         <div class="layui-main">
             <label style="font-size: 30px;">南京市妇幼保健院出库单</label>
         </div>
@@ -176,7 +176,7 @@
             JsBarcode(barcode, str, options); //原生
 
             $(".print_btn").on("click", function () {
-                $("#print-area").jqprint({
+                $("#printer-area").jqprint({
                     debug: false,
                     importCSS: true,
                     printContainer: true,

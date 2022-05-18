@@ -4,7 +4,7 @@
         xsi:noNamespaceSchemaLocation="http://www.padual.com/java/logback.xsd"
         debug="false" scan="true" scanPeriod="30 second">
 
-    <property name="ROOT" value="C:/logs/wms_gk/" />
+    <property name="ROOT" value="C:/logs/wms_nw/" />
     <property name="FILESIZE" value="50MB" />
     <property name="MAXHISTORY" value="100" />
     <property name="DATETIME" value="yyyy/MM/dd HH:mm:ss" />

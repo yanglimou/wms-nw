@@ -13,7 +13,9 @@ public enum SpdUrl {
     URL_USER("/Users", "同步人员信息"),
     URL_GOODS("/Goods", "同步耗材信息"),
     URL_TAG("/TTag", "同步制标信息"),
-    URL_STOCK_TAG("/StockTag", "同步库存信息");
+    URL_STOCK_TAG("/StockTag", "同步库存信息"),
+    URL_PRINT("/TTagIns", "同步打印信息"),
+    ;
 
     private String url;
     private String module;

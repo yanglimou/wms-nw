@@ -58,7 +58,7 @@
         <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="cancel"><i class="layui-icon">&#xe615;</i>取消单据</a>
         {{#}}}
 
-    <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="print"><i class="layui-icon">&#xe66e;</i>打印</a>
+    <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="printer"><i class="layui-icon">&#xe66e;</i>打印</a>
 </script>
 
 
@@ -266,7 +266,7 @@
                         });
                         break;
 
-                    case 'print':
+                    case 'printer':
                         printOrderIn(data);
                         break;
                 }

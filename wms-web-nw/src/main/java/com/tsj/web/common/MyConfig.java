@@ -89,6 +89,7 @@ public class MyConfig extends JFinalConfig {
         me.add("/com", ComController.class);
         me.add("/sys", SysController.class);
         me.add("/file", FileController.class);
+        me.add("/print", PrintController.class);
 
         me.add("/api/sys", ApiSysController.class);
         me.add("/api/com", ApiComController.class);

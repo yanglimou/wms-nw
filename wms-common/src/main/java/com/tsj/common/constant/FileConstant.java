@@ -1,5 +1,6 @@
 package com.tsj.common.constant;
 
+import com.tsj.common.config.CommonConfig;
 import com.tsj.common.utils.BaseUtil;
 
 /**
@@ -7,8 +8,7 @@ import com.tsj.common.utils.BaseUtil;
  * @author Frank
  */
 public class FileConstant {
-    private final static String BASE_PATH = BaseUtil.isWindows() ?
-            "D:/files/wms_gk/" : "/usr/local/files/wms_gk/";
+    private final static String BASE_PATH = CommonConfig.prop.get("file.path");
 
     /**
      * 高值柜刷卡拍照上传文件路径

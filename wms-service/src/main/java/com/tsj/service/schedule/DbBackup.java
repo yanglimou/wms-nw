@@ -28,7 +28,7 @@ public class DbBackup implements ITask {
     public void run() {
         try {
             String backName = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date()) + ".sql";
-            dbBackUp(CommonConfig.prop.get("wms.user"), CommonConfig.prop.get("wms.password"), "wms_gk", FileConstant.BACKUP_PATH, backName);
+            dbBackUp(CommonConfig.prop.get("wms.user"), CommonConfig.prop.get("wms.password"), CommonConfig.prop.get("wms.db"), FileConstant.BACKUP_PATH, backName);
             logger.info("DbBackup OK:" + backName);
         } catch (Exception e) {
             logger.error(e.toString());

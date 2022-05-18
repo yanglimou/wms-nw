@@ -12,6 +12,9 @@ spd.deptName=手术麻醉中心,SPD院内运营中心
 wms.url = jdbc:mysql://39.107.46.205:3306/wms_nw?characterEncoding=utf8&useSSL=false&zeroDateTimeBehavior=convertToNull&tinyInt1isBit=false
 wms.user = root
 wms.password = 123456
+wms.db = wms_nw
+
+file.path = C:/files/wms_nv/
 
 #switch
 switch.imageRotate=0
@@ -20,7 +23,7 @@ switch.imageRotate=0
 password=123456
 
 #http
-SPD_BASE_URL = http://10.82.146.26:8867/api/v1
+SPD_BASE_URL = http://10.1.2.51:8098/api/v1
 
 #TagPrefix
 UserTagPrefix=AAA
