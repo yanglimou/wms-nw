@@ -23,7 +23,7 @@ switch.imageRotate=0
 password=123456
 
 #http
-SPD_BASE_URL = http://10.1.2.51:8098/api/v1
+SPD_BASE_URL = http://10.1.199.48:8098/api/v1
 
 #TagPrefix
 UserTagPrefix=AAA
