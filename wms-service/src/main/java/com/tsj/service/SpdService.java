@@ -546,6 +546,7 @@ public class SpdService extends MyService {
                 String SHELF_CODE = record.getStr("SHELF_CODE");
                 String ISHV = record.getStr("ISHV");
                 String CREATEDATE = record.getStr("CREATEDATE");
+                String INSNO = record.getStr("INSNO");
                 if (Print.dao.findById(CASE_NBR) == null) {
                     Print print = new Print().setCaseNbr(CASE_NBR)
                             .setEpc("474B485400" + CASE_NBR)
@@ -558,7 +559,8 @@ public class SpdService extends MyService {
                             .setShelfCode(SHELF_CODE)
                             .setHvFlag(ISHV)
                             .setCreateDate(CREATEDATE)
-                            .setPrintFlag("0");
+                            .setPrintFlag("0")
+                            .setInsNo(INSNO);
                     saveList.add(print);
                 }
             });

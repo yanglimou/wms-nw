@@ -131,6 +131,15 @@ public abstract class BasePrint<M extends BasePrint<M>> extends Model<M> impleme
 	public String getUserId() {
 		return getStr("userId");
 	}
+
+	public M setInsNo(String insNo) {
+		set("insNo", insNo);
+		return (M)this;
+	}
+
+	public String getInsNo() {
+		return getStr("insNo");
+	}
 	
 }
 

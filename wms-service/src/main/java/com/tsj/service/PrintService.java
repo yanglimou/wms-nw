@@ -19,4 +19,13 @@ public class PrintService extends MyService {
         return Db.paginate(pageNumber, pageSize, select, sqlExceptSelect);
     }
 
+    public List<Record> findByInsNo(String insNo) {
+        return Db.find("select a.caseNbr,a.epc,a.comGoodsId,a.lotNo,a.expireDate,a.shelfCode,a.hvFlag,b.name,b.spec,b.unit,c.`name` manufacturerName from print a LEFT JOIN base_goods b on a.comGoodsId=b.id left JOIN base_manufacturer c on b.manufacturerId=c.id where a.insNo=?", insNo);
+    }
+
+    public Page<Record> getPrintPage2(int pageNumber, int pageSize) {
+        String select = "select a.* ";
+        String sqlExceptSelect = " from (select insNo,count(insNo) num,sum(hvFlag='是') highNum,sum(hvFlag='否') lowNum,sum(printFlag=1) printNum,sum(printFlag=0) unPrintNum from print group by insNo ORDER BY insNo desc) as a";
+        return Db.paginate(pageNumber, pageSize, select, sqlExceptSelect);
+    }
 }

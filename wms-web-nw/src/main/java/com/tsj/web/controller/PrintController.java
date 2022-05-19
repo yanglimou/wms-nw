@@ -16,6 +16,9 @@ import com.tsj.common.utils.R;
 import com.tsj.service.PrintService;
 import com.tsj.web.common.MyController;
 import com.tsj.web.websocket.MyWebSocket;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.List;
 
 public class PrintController extends MyController {
 
@@ -31,9 +34,53 @@ public class PrintController extends MyController {
     }
 
     @Before(GET.class)
+    @NotNull({"page", "limit"})
+    @OperateLog("查询打印分页2")
+    public void getPrintList2(int page, int limit) {
+        Page<Record> pageData = printService.getPrintPage2(page, limit);
+        renderJson(R.ok().putData(pageData.getList()).put("count", pageData.getTotalRow()));
+    }
+
+    @Before(GET.class)
     @OperateLog("查询在线打印机")
     public void getPrinter() {
         renderJson(R.ok().putData(MyWebSocket.getPrinter()));
+    }
+
+    @Before(POST.class)
+    @OperateLog("执行打印操作")
+    public void doPrint2(String insNo, String high, String low) {
+        logger.info("insNo:{},high:{},low:{}", insNo, high, low);
+        List<Record> recordList = printService.findByInsNo(insNo);
+        JSONArray highRequests = new JSONArray();
+        JSONArray lowRequests = new JSONArray();
+        recordList.forEach(record -> {
+            JSONObject printRequest = new JSONObject();
+            printRequest.put("name", record.getStr("name"));
+            printRequest.put("spec", record.getStr("spec"));
+            printRequest.put("manufacturerName", record.getStr("manufacturerName"));
+            printRequest.put("lotNo", record.getStr("lotNo"));
+            printRequest.put("expireDate", record.getStr("expireDate").substring(0, 10));
+            printRequest.put("shelfCode", record.getStr("shelfCode"));
+            printRequest.put("comGoodsId", record.getStr("comGoodsId"));
+            printRequest.put("caseNbr", record.getStr("caseNbr"));
+            printRequest.put("rfid", record.getStr("epc"));
+            printRequest.put("unit", record.getStr("unit"));
+            printRequest.put("highFlag", record.getStr("hvFlag").equals("是") ? "H" : "L");
+            if (record.getStr("hvFlag").equals("是")) {
+                highRequests.add(printRequest);
+            } else {
+                lowRequests.add(printRequest);
+            }
+        });
+        Db.update("update print set printFlag=1 , userId=? where insNo=?", getLoginUserId(), insNo);
+        if (StringUtils.isNotEmpty(low)) {
+            MyWebSocket.send(low, lowRequests.toJSONString());
+        }
+        if (StringUtils.isNotEmpty(high)) {
+            MyWebSocket.send(high, highRequests.toJSONString());
+        }
+        renderJson(R.ok().putData("success"));
     }
 
     @Before(POST.class)
@@ -43,10 +90,10 @@ public class PrintController extends MyController {
         JSONObject requestObject = JSON.parseObject(rawData);
         //处理高值
         JSONObject high = requestObject.getJSONObject("high");
-        handle(high,true);
+        handle(high, true);
         //处理低值
         JSONObject low = requestObject.getJSONObject("low");
-        handle(low,false);
+        handle(low, false);
         renderJson(R.ok().putData("success"));
     }
 
@@ -65,7 +112,7 @@ public class PrintController extends MyController {
             printRequest.put("caseNbr", jsonObject.getString("caseNbr"));
             printRequest.put("rfid", jsonObject.getString("epc"));
             printRequest.put("unit", jsonObject.getString("unit"));
-            printRequest.put("highFlag", isHighFlag?"H":"L");
+            printRequest.put("highFlag", isHighFlag ? "H" : "L");
             printRequests.add(printRequest);
             Db.update("update print set printFlag=1 , userId=? where caseNbr=?", getLoginUserId(), jsonObject.getString("caseNbr"));
         });
