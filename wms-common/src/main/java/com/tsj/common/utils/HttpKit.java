@@ -147,9 +147,10 @@ public class HttpKit {
             StringEntity stringEntity = new StringEntity(jsonObject.toString(), "utf-8");
             stringEntity.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
             httpPost.setEntity(stringEntity);
-
+            logger.info("http post request "+jsonObject.toString());
             httpResponse = httpClient.execute(httpPost);
             result = EntityUtils.toString(httpResponse.getEntity());
+            logger.debug("http post response "+result);
         } catch (IOException e) {
             errorMessage += e.toString();
         } finally {

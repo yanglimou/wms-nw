@@ -530,9 +530,13 @@ public class SpdService extends MyService {
         logger.info("同步打印");
         //同步打印
         if (isPrint) {
+
+            int lastDays = CommonConfig.prop.getInt("spd.lastDays", 7);
+            String QueryEndDate = DateUtils.getCurrentTime();
+            String QueryBeginDate = DateUtils.addDay(QueryEndDate, -1 * lastDays);
             List<Print> saveList = new ArrayList<>();
-            List<Record> recordList = HttpKit.postSpdData(SPD_BASE_URL + SpdUrl.URL_PRINT.getUrl(), "MODIFYDATE",
-                    Kv.create());
+            List<Record> recordList = HttpKit.postSpdData(SPD_BASE_URL + SpdUrl.URL_PRINT.getUrl(), null,
+                    Kv.by("QueryBeginDate", QueryBeginDate).set("QueryEndDate", QueryEndDate));
             logger.info("同步打印数量:" + recordList.size());
             recordList.forEach(record -> {
                 //新增三个参数
