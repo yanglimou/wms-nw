@@ -28,8 +28,8 @@ public class PrintController extends MyController {
     @Before(GET.class)
     @NotNull({"page", "limit"})
     @OperateLog("查询打印分页")
-    public void getPrintList(int page, int limit) {
-        Page<Record> pageData = printService.getPrintPage(page, limit);
+    public void getPrintList(int page, int limit,String caseNbr) {
+        Page<Record> pageData = printService.getPrintPage(page, limit,caseNbr);
         renderJson(R.ok().putData(pageData.getList()).put("count", pageData.getTotalRow()));
     }
 

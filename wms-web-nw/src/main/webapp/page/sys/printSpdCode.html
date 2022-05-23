@@ -18,6 +18,13 @@
 <blockquote class="layui-elem-quote quoteBox">
     <form class="layui-form">
         <div class="layui-input-inline">
+            <input type="text" class="layui-input" id="caseNbr" placeholder="请输入spd码">
+        </div>
+
+        <div class="layui-input-inline">
+            <a class="layui-btn search_btn" data-type="reload" id="search"><i class="layui-icon">&#xe615;</i>搜索</a>
+        </div>
+        <div class="layui-input-inline">
             <select class="high" id="high">
             </select>
         </div>
@@ -67,14 +74,27 @@
 
                 freshSelect()
 
-
             //搜索
+            $("#search").on("click", function () {
+
+                table.reload('printTable', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    , where: {
+                        caseNbr: $('#caseNbr').val()
+                    }
+                });
+
+            });
+
+            //刷新打印机
             $("#refresh").on("click", function () {
                 freshSelect()
             })
 
 
-            //搜索
+            //打印
             $("#print").on("click", function () {
                 var status=table.checkStatus("printTable")
                 console.log(status)
@@ -84,63 +104,71 @@
                 }
                 var high=$("#high").val();
                 var low=$("#low").val();
-                var highNum=status.data[0].highNum
-                var lowNum=status.data[0].lowNum
-                if(highNum && !high){
+                var highList=status.data.filter(o=>o.hvFlag=='是')
+                var lowList=status.data.filter(o=>o.hvFlag!='是')
+                if(highList.length>0 && !high){
                     layer.msg('请选择高值打印机');
                     return;
                 }
-                if(lowNum && !low){
+                if(lowList.length>0 && !low){
                     layer.msg('请选择低值打印机');
                     return;
                 }
                 var data={
-                    insNo:status.data[0].insNo,
-                    high:high,
-                    low:low
+                    high:{
+                        id:high,
+                        data:highList
+                    },
+                    low:{
+                        id:low,
+                        data:lowList
+                    }
                 }
-                console.log(data);
+
                 $.ajax({
-                    url: contextPath + '/print/doPrint2' + getAccessTokenUrl(),
+                    url: contextPath + '/print/doPrint' + getAccessTokenUrl(),
                     type: 'post',
-                    data: data,
+                    contentType :'application/json',
+                    data: JSON.stringify(data),
                     dataType: 'json',
                     success: function (data) {
                         if (data.code == 0) {
                             table.reload('printTable')
-                            layer.msg("发送打印消息成功")
                         }
                     }
                 });
             });
 
-
-
             //系统列表
             var tableIns3 = table.render({
                 elem: '#printList'
-                , url: contextPath + '/print/getPrintList2' + getAccessTokenUrl()//数据接口
+                , url: contextPath + '/print/getPrintList' + getAccessTokenUrl()//数据接口
                 , id: 'printTable'
                 , page: true //开启分页
                 , height: "full-105"
                 , limit: 15
                 , limits: [10, 15, 20]
                 , even: true
-                , method: 'GET'   //laui 修改请求方式  
-                , cellMinWidth: 80 //最小宽度         
-                , cols: [[ //表头        
-                    { type: 'radio', fixed: 'left', align: "center" }
-                    , { field: 'insNo', title: '入库单号', width: 100, align: "center" }
-                    , { field: 'num', title: '制标数据条数', width: 150, align: "center" }
-                    , { field: 'highNum', title: '需要高值打印机', width: 150, align: "center",templet:"<div>{{d.highNum!=0?'是':''}}</div>" }
-                    , { field: 'lowNum', title: '需要低值打印机', width: 150, align: "center",templet:"<div>{{d.lowNum!=0?'是':''}}</div>" }
-                    , { field: 'printNum', title: '已打印', width: 150, align: "center",templet:"<div>{{d.printNum==d.num?'是':'否'}}</div>" }
-
+                , method: 'GET'   //laui 修改请求方式
+                , cellMinWidth: 80 //最小宽度
+                , cols: [[ //表头
+                    { type: 'checkbox', fixed: 'left', align: "center" }
+                    , { field: 'insNo', title: '入库单号', width: 250, align: "center" }
+                    , { field: 'caseNbr', title: 'SPD码', width: 250, align: "center" }
+                    , { field: 'epc', title: 'epc', width: 250, align: "center" }
+                    , { field: 'comGoodsId', title: '商品编号', width: 150, align: "center" }
+                    , { field: 'lotNo', title: '批次', width: 150, align: "center" }
+                    , { field: 'expireDate', title: '过期时间', width: 150, align: "center" }
+                    , { field: 'shelfCode', title: '货架编码', width: 200, align: "center" }
+                    , { field: 'hvFlag', title: '高低值标识', width: 150, align: "center" }
+                    , { field: 'name', title: '商品名称', width: 300, align: "center" }
+                    , { field: 'spec', title: '规格', width: 300, align: "center" }
+                    , { field: 'unit', title: '单位', width: 80, align: "center" }
+                    , { field: 'manufacturerName', title: '生产商', width: 300, align: "center" }
+                    , { field: 'userId', title: '用户编号', width: 100, align: "center" }
+                    , { field: 'printFlag', title: '打印标识', width: 100, align: "center",templet:function(d){return d.printFlag==1?'已打印':'未打印'} }
                 ]]
             });
-
-
-
         });
 
 

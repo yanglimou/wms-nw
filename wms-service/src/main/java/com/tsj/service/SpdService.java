@@ -381,6 +381,54 @@ public class SpdService extends MyService {
             }
         }
         logger.info("同步制标");
+
+        logger.info("同步打印");
+        //同步打印
+        if (isPrint) {
+
+            int lastDays = CommonConfig.prop.getInt("spd.lastDays", 7);
+            String QueryEndDate = DateUtils.getCurrentTime();
+            String QueryBeginDate = DateUtils.addDay(QueryEndDate, -1 * lastDays);
+            List<Print> saveList = new ArrayList<>();
+            List<Record> recordList = HttpKit.postSpdData(SPD_BASE_URL + SpdUrl.URL_PRINT.getUrl(), null,
+                    Kv.by("QueryBeginDate", QueryBeginDate).set("QueryEndDate", QueryEndDate));
+            logger.info("同步打印数量:" + recordList.size());
+            recordList.forEach(record -> {
+                //新增三个参数
+                String CASE_NBR = record.getStr("CASE_NBR");
+                String ORDER_CODE = record.getStr("ORDER_CODE");
+                String COM_GOODS_ID = record.getStr("COM_GOODS_ID");
+                String LOT_NO = record.getStr("LOT_NO");
+                String EXPIRE_DATE = record.getStr("EXPIRE_DATE");
+                String DEPOT_ID = record.getStr("DEPOT_ID");
+                String SHELF_NAME = record.getStr("SHELF_NAME");
+                String SHELF_CODE = record.getStr("SHELF_CODE");
+                String ISHV = record.getStr("ISHV");
+                String CREATEDATE = record.getStr("CREATEDATE");
+                String INSNO = record.getStr("INSNO");
+                if (Print.dao.findById(CASE_NBR) == null) {
+                    Print print = new Print().setCaseNbr(CASE_NBR)
+                            .setEpc("474B485400" + CASE_NBR)
+                            .setOrderCode(ORDER_CODE)
+                            .setComGoodsId(COM_GOODS_ID)
+                            .setLotNo(LOT_NO)
+                            .setExpireDate(EXPIRE_DATE)
+                            .setDepotId(DEPOT_ID)
+                            .setShelfName(SHELF_NAME)
+                            .setShelfCode(SHELF_CODE)
+                            .setHvFlag(ISHV)
+                            .setCreateDate(CREATEDATE)
+                            .setPrintFlag("0")
+                            .setInsNo(INSNO);
+                    saveList.add(print);
+                }
+            });
+            // 批量新增
+            if (!saveList.isEmpty()) {
+                Db.batchSave(saveList, batchSize);
+            }
+        }
+
         //同步制标{退中心库的耗材唯一码会被重新使用，本地需要判断后覆盖}
         String deptNames = CommonConfig.prop.get("spd.deptName");
         if (isMaterial && StringUtils.isNotEmpty(deptNames)) {
@@ -433,28 +481,6 @@ public class SpdService extends MyService {
                 if (!updateList.isEmpty()) {
                     Db.batchUpdate(updateList, batchSize);
                 }
-                //TODO 自动绑定标签
-                List<String> orderCodeList = new ArrayList<>();
-                ComService comService = Aop.get(ComService.class);
-                saveList.forEach(material -> {
-
-                    //过滤相同的配送单号
-                    String orderCode = material.getOrderCode();
-                    if (orderCodeList.contains(orderCode)) {
-                        return;
-                    }
-                    orderCodeList.add(orderCode);
-
-                    //调用标签绑定
-                    List<Record> spdCodeList = Db.find("select spdCode from base_material where orderCode=?", orderCode);
-                    spdCodeList.forEach(item -> {
-                        String spdCode = item.get("spdCode");
-
-                        //TODO 表名替换为标签打印表
-                        Record record = Db.findById("print", spdCode);
-                        comService.saveTagEpc(spdCode, record.getStr("epc"), record.getStr("userId"));
-                    });
-                });
 
 
                 //TODO 自动创建配送单
@@ -525,54 +551,35 @@ public class SpdService extends MyService {
                         Db.batchUpdate(tagUpdateList, batchSize);
                     }
                 }
-            }
-        }
-        logger.info("同步打印");
-        //同步打印
-        if (isPrint) {
 
-            int lastDays = CommonConfig.prop.getInt("spd.lastDays", 7);
-            String QueryEndDate = DateUtils.getCurrentTime();
-            String QueryBeginDate = DateUtils.addDay(QueryEndDate, -1 * lastDays);
-            List<Print> saveList = new ArrayList<>();
-            List<Record> recordList = HttpKit.postSpdData(SPD_BASE_URL + SpdUrl.URL_PRINT.getUrl(), null,
-                    Kv.by("QueryBeginDate", QueryBeginDate).set("QueryEndDate", QueryEndDate));
-            logger.info("同步打印数量:" + recordList.size());
-            recordList.forEach(record -> {
-                //新增三个参数
-                String CASE_NBR = record.getStr("CASE_NBR");
-                String ORDER_CODE = record.getStr("ORDER_CODE");
-                String COM_GOODS_ID = record.getStr("COM_GOODS_ID");
-                String LOT_NO = record.getStr("LOT_NO");
-                String EXPIRE_DATE = record.getStr("EXPIRE_DATE");
-                String DEPOT_ID = record.getStr("DEPOT_ID");
-                String SHELF_NAME = record.getStr("SHELF_NAME");
-                String SHELF_CODE = record.getStr("SHELF_CODE");
-                String ISHV = record.getStr("ISHV");
-                String CREATEDATE = record.getStr("CREATEDATE");
-                String INSNO = record.getStr("INSNO");
-                if (Print.dao.findById(CASE_NBR) == null) {
-                    Print print = new Print().setCaseNbr(CASE_NBR)
-                            .setEpc("474B485400" + CASE_NBR)
-                            .setOrderCode(ORDER_CODE)
-                            .setComGoodsId(COM_GOODS_ID)
-                            .setLotNo(LOT_NO)
-                            .setExpireDate(EXPIRE_DATE)
-                            .setDepotId(DEPOT_ID)
-                            .setShelfName(SHELF_NAME)
-                            .setShelfCode(SHELF_CODE)
-                            .setHvFlag(ISHV)
-                            .setCreateDate(CREATEDATE)
-                            .setPrintFlag("0")
-                            .setInsNo(INSNO);
-                    saveList.add(print);
-                }
-            });
-            // 批量新增
-            if (!saveList.isEmpty()) {
-                Db.batchSave(saveList, batchSize);
+
+                //TODO 自动绑定标签
+                List<String> orderCodeList = new ArrayList<>();
+                ComService comService = Aop.get(ComService.class);
+                saveList.forEach(material -> {
+
+                    //过滤相同的配送单号
+                    String orderCode = material.getOrderCode();
+                    if (orderCodeList.contains(orderCode)) {
+                        return;
+                    }
+                    orderCodeList.add(orderCode);
+
+                    //调用标签绑定
+                    List<Record> spdCodeList = Db.find("select spdCode from base_material where orderCode=?", orderCode);
+                    spdCodeList.forEach(item -> {
+                        String spdCode = item.get("spdCode");
+
+                        //TODO 表名替换为标签打印表
+                        logger.info("spdCode:"+spdCode);
+                        Record record = Db.findFirst("select epc,userId from print where caseNbr=?", spdCode);
+                        if(record!=null)
+                            comService.saveTagEpc(spdCode, record.getStr("epc"), record.getStr("userId"));
+                    });
+                });
             }
         }
+
         logger.debug("postBasicData");
     }
 }

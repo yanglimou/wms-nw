@@ -5,6 +5,7 @@ import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.Record;
 import com.tsj.service.common.MyService;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
@@ -13,9 +14,13 @@ public class PrintService extends MyService {
 
     public static final Log logger = Log.getLog(PrintService.class);
 
-    public Page<Record> getPrintPage(int pageNumber, int pageSize) {
-        String select = "select a.caseNbr,a.epc,a.userId,a.comGoodsId,a.lotNo,a.expireDate,a.printFlag,a.shelfCode,a.hvFlag,b.name,b.spec,b.unit,c.`name` manufacturerName ";
-        String sqlExceptSelect = "  from print a LEFT JOIN base_goods b on a.comGoodsId=b.id left JOIN base_manufacturer c on b.manufacturerId=c.id order by a.printFlag,a.caseNbr ";
+    public Page<Record> getPrintPage(int pageNumber, int pageSize,String caseNbr) {
+        String condition="";
+        if(StringUtils.isNotEmpty(caseNbr)){
+            condition+=" and a.caseNbr='"+caseNbr+"'";
+        }
+        String select = "select a.insNo,a.caseNbr,a.epc,a.userId,a.comGoodsId,a.lotNo,a.expireDate,a.printFlag,a.shelfCode,a.hvFlag,b.name,b.spec,b.unit,c.`name` manufacturerName ";
+        String sqlExceptSelect = "  from print a LEFT JOIN base_goods b on a.comGoodsId=b.id left JOIN base_manufacturer c on b.manufacturerId=c.id where 1=1 "+condition+" order by a.printFlag,a.caseNbr ";
         return Db.paginate(pageNumber, pageSize, select, sqlExceptSelect);
     }
 
