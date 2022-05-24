@@ -17,7 +17,7 @@ import java.util.Date;
  */
 public class DbBackup implements ITask {
 
-    private static final Log logger = Log.getLog(RemoveTemp.class);
+    private static final Log logger = Log.getLog(DbBackup.class);
 
     @Override
     public void stop() {

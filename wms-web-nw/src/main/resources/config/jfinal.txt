@@ -14,7 +14,7 @@ wms.user = root
 wms.password = 123456
 wms.db = wms_nw
 
-file.path = C:/files/wms_nv/
+file.path = C:/files/wms_nw/
 
 #switch
 switch.imageRotate=0
