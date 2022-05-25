@@ -17,13 +17,18 @@
 <body class="childrenBody">
 <blockquote class="layui-elem-quote quoteBox">
     <form class="layui-form">
+
         <div class="layui-input-inline">
-            <input type="text" class="layui-input" id="caseNbr" placeholder="请输入spd码">
+            <input type="text" class="layui-input" id="insNo" placeholder="请输入spd制标单号">
+        </div>
+        <div class="layui-input-inline">
+            <input type="text" class="layui-input" id="caseNbr" placeholder="请输入spd唯一码">
         </div>
 
         <div class="layui-input-inline">
             <a class="layui-btn search_btn" data-type="reload" id="search"><i class="layui-icon">&#xe615;</i>搜索</a>
         </div>
+        <div style="margin-top:10px"></div>
         <div class="layui-input-inline">
             <select class="high" id="high">
             </select>
@@ -82,7 +87,8 @@
                         curr: 1 //重新从第 1 页开始
                     }
                     , where: {
-                        caseNbr: $('#caseNbr').val()
+                        caseNbr: $('#caseNbr').val(),
+                        insNo: $('#insNo').val()
                     }
                 });
 
@@ -153,8 +159,8 @@
                 , cellMinWidth: 80 //最小宽度
                 , cols: [[ //表头
                     { type: 'checkbox', fixed: 'left', align: "center" }
-                    , { field: 'insNo', title: '入库单号', width: 250, align: "center" }
-                    , { field: 'caseNbr', title: 'SPD码', width: 250, align: "center" }
+                    , { field: 'insNo', title: 'spd制标单号', width: 250, align: "center" }
+                    , { field: 'caseNbr', title: 'spd唯一码', width: 250, align: "center" }
                     , { field: 'epc', title: 'epc', width: 250, align: "center" }
                     , { field: 'comGoodsId', title: '商品编号', width: 150, align: "center" }
                     , { field: 'lotNo', title: '批次', width: 150, align: "center" }

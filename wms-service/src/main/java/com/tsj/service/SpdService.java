@@ -380,7 +380,6 @@ public class SpdService extends MyService {
                 Db.batchUpdate(updateList, batchSize);
             }
         }
-        logger.info("同步制标");
 
         logger.info("同步打印");
         //同步打印
@@ -428,6 +427,8 @@ public class SpdService extends MyService {
                 Db.batchSave(saveList, batchSize);
             }
         }
+
+        logger.info("同步制标");
 
         //同步制标{退中心库的耗材唯一码会被重新使用，本地需要判断后覆盖}
         String deptNames = CommonConfig.prop.get("spd.deptName");
@@ -556,7 +557,10 @@ public class SpdService extends MyService {
                 //TODO 自动绑定标签
                 List<String> orderCodeList = new ArrayList<>();
                 ComService comService = Aop.get(ComService.class);
-                saveList.forEach(material -> {
+                List<Material> materialList = new ArrayList<>();
+                materialList.addAll(saveList);
+                materialList.addAll(updateList);
+                materialList.forEach(material -> {
 
                     //过滤相同的配送单号
                     String orderCode = material.getOrderCode();
