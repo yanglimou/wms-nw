@@ -407,7 +407,7 @@ public class SpdService extends MyService {
                 String INSNO = record.getStr("INSNO");
                 if (Print.dao.findById(CASE_NBR) == null) {
                     Print print = new Print().setCaseNbr(CASE_NBR)
-                            .setEpc("474B485400" + CASE_NBR)
+                            .setEpc("474B4854"+("是".equals(ISHV)?"0":"1")+"0" + CASE_NBR)
                             .setOrderCode(ORDER_CODE)
                             .setComGoodsId(COM_GOODS_ID)
                             .setLotNo(LOT_NO)
@@ -431,159 +431,166 @@ public class SpdService extends MyService {
         logger.info("同步制标");
 
         //同步制标{退中心库的耗材唯一码会被重新使用，本地需要判断后覆盖}
-        String deptNames = CommonConfig.prop.get("spd.deptName");
-        if (isMaterial && StringUtils.isNotEmpty(deptNames)) {
+//        String deptNames = CommonConfig.prop.get("spd.deptName");
+//        if (isMaterial && StringUtils.isNotEmpty(deptNames)) {
+        if (isMaterial) {
             int lastDays = CommonConfig.prop.getInt("spd.lastDays", 7);
             String QueryEndDate = DateUtils.getCurrentTime();
             String QueryBeginDate = DateUtils.addDay(QueryEndDate, -1 * lastDays);
 
-            for (String deptName : deptNames.split(",")) {
-                Dept dept = cacheService.getDeptByName(deptName);
-                if (dept == null) {
-                    continue;
+//            for (String deptName : deptNames.split(",")) {
+//                Dept dept = cacheService.getDeptByName(deptName);
+//                if (dept == null) {
+//                    continue;
+//                }
+//                logger.info("同步科室：" + deptName);
+
+            List<Material> saveList = new ArrayList<>();
+            List<Material> updateList = new ArrayList<>();
+//                List<Record> recordList = HttpKit.postSpdData(SPD_BASE_URL + SpdUrl.URL_TAG.getUrl(), "CREATEDATE",
+//                        Kv.by("QueryBeginDate", QueryBeginDate).set("QueryEndDate", QueryEndDate).set("DeptId", dept.getId()));
+
+            List<Record> recordList = HttpKit.postSpdData(SPD_BASE_URL + SpdUrl.URL_TAG.getUrl(), "CREATEDATE",
+                    Kv.by("QueryBeginDate", QueryBeginDate).set("QueryEndDate", QueryEndDate));
+            logger.info("同步制标数量:" + recordList.size());
+
+            recordList.forEach(record -> {
+                String CASE_NBR = record.getStr("CASE_NBR");
+                Material material = cacheService.getMaterialById(CASE_NBR);
+                if (material == null) {
+                    material = new Material()
+                            .setSpdCode(CASE_NBR)
+                            .setDeptId(record.getStr("DEPOT_ID"))
+                            .setOrderCode(record.getStr("ORDER_CODE"))
+                            .setGoodsId(record.getStr("COM_GOODS_ID"))
+                            .setBatchNo(record.getStr("LOT_NO"))
+                            .setExpireDate(record.getStr("EXPIRE_DATE").replace("T", " "))
+                            .setCreateDate(record.getStr("CREATEDATE"));
+                    saveList.add(material);
+                } else if (!material.getCreateDate().equals(record.getStr("CREATEDATE"))) {
+                    material.setDeptId(record.getStr("DEPOT_ID"))
+                            .setOrderCode(record.getStr("ORDER_CODE"))
+                            .setGoodsId(record.getStr("COM_GOODS_ID"))
+                            .setBatchNo(record.getStr("LOT_NO"))
+                            .setExpireDate(record.getStr("EXPIRE_DATE").replace("T", " "))
+                            .setCreateDate(record.getStr("CREATEDATE"));
+                    updateList.add(material);
+
+                    cacheService.removeCache(CacheBase, MaterialById, CASE_NBR);
                 }
-                logger.info("同步科室：" + deptName);
+            });
+            // 批量新增和修改信息
+            if (!saveList.isEmpty()) {
+                Db.batchSave(saveList, batchSize);
+            }
+            if (!updateList.isEmpty()) {
+                Db.batchUpdate(updateList, batchSize);
+            }
 
-                List<Material> saveList = new ArrayList<>();
-                List<Material> updateList = new ArrayList<>();
-                List<Record> recordList = HttpKit.postSpdData(SPD_BASE_URL + SpdUrl.URL_TAG.getUrl(), "CREATEDATE",
-                        Kv.by("QueryBeginDate", QueryBeginDate).set("QueryEndDate", QueryEndDate).set("DeptId", dept.getId()));
-                logger.info("同步制标数量:" + recordList.size());
 
-                recordList.forEach(record -> {
-                    String CASE_NBR = record.getStr("CASE_NBR");
-                    Material material = cacheService.getMaterialById(CASE_NBR);
-                    if (material == null) {
-                        material = new Material()
-                                .setSpdCode(CASE_NBR)
-                                .setDeptId(record.getStr("DEPOT_ID"))
-                                .setOrderCode(record.getStr("ORDER_CODE"))
-                                .setGoodsId(record.getStr("COM_GOODS_ID"))
-                                .setBatchNo(record.getStr("LOT_NO"))
-                                .setExpireDate(record.getStr("EXPIRE_DATE").replace("T", " "))
-                                .setCreateDate(record.getStr("CREATEDATE"));
-                        saveList.add(material);
-                    } else if (!material.getCreateDate().equals(record.getStr("CREATEDATE"))) {
-                        material.setDeptId(record.getStr("DEPOT_ID"))
-                                .setOrderCode(record.getStr("ORDER_CODE"))
-                                .setGoodsId(record.getStr("COM_GOODS_ID"))
-                                .setBatchNo(record.getStr("LOT_NO"))
-                                .setExpireDate(record.getStr("EXPIRE_DATE").replace("T", " "))
-                                .setCreateDate(record.getStr("CREATEDATE"));
-                        updateList.add(material);
-
-                        cacheService.removeCache(CacheBase, MaterialById, CASE_NBR);
-                    }
-                });
-                // 批量新增和修改信息
-                if (!saveList.isEmpty()) {
-                    Db.batchSave(saveList, batchSize);
+            //TODO 自动创建配送单
+            List<Order> orderList = new ArrayList<>();
+            saveList.forEach(material -> {
+                Order order = cacheService.getOrderByCode(material.getOrderCode());
+                if (order == null) {
+                    Order newOrder = new Order();
+                    newOrder.setId(IDGenerator.makeId());
+                    newOrder.setDeptId(material.getDeptId());
+                    newOrder.setCode(material.getOrderCode());
+                    newOrder.setCreateDate(DateUtil.now());
+                    //初始状态为待复核
+                    newOrder.setState(SysConstant.StateNeedConfirm);
+                    orderList.add(newOrder);
                 }
-                if (!updateList.isEmpty()) {
-                    Db.batchUpdate(updateList, batchSize);
-                }
+            });
+            if (!orderList.isEmpty()) {
+                Db.batchSave(orderList, batchSize);
+            }
 
+            //TODO 自动创建标签记录
+            if (true) {
+                List<Tag> tagSaveList = new ArrayList<>();
+                List<Tag> tagUpdateList = new ArrayList<>();
 
-                //TODO 自动创建配送单
-                List<Order> orderList = new ArrayList<>();
-                saveList.forEach(material -> {
-                    Order order = cacheService.getOrderByCode(material.getOrderCode());
-                    if (order == null) {
-                        Order newOrder = new Order();
-                        newOrder.setId(IDGenerator.makeId());
-                        newOrder.setDeptId(material.getDeptId());
-                        newOrder.setCode(material.getOrderCode());
-                        newOrder.setCreateDate(DateUtil.now());
-                        //初始状态为待复核
-                        newOrder.setState(SysConstant.StateNeedConfirm);
-                        orderList.add(newOrder);
-                    }
-                });
-                if (!orderList.isEmpty()) {
-                    Db.batchSave(orderList, batchSize);
-                }
-
-                //TODO 自动创建标签记录
-                if (true) {
-                    List<Tag> tagSaveList = new ArrayList<>();
-                    List<Tag> tagUpdateList = new ArrayList<>();
-
-                    List<Material> materialList = new ArrayList<>();
-                    materialList.addAll(saveList);
-                    materialList.addAll(updateList);
-
-                    materialList.forEach(material -> {
-                        Tag tag = cacheService.getTagById(material.getSpdCode());
-                        if (tag == null) {
-                            tag = new Tag()
-                                    .setSpdCode(material.getSpdCode())
-                                    .setEpc(null)
-                                    .setAccept(TagNo)
-
-                                    .setGoodsId(material.getGoodsId())
-                                    .setDeptId(material.getDeptId())
-                                    .setOrderCode(material.getOrderCode())
-                                    .setBatchNo(material.getBatchNo())
-                                    .setExpireDate(material.getExpireDate())
-                                    .setCreateUserId("1")
-                                    .setCreateDate(DateUtils.getCurrentTime());
-                            tagSaveList.add(tag);
-                        } else {
-                            tag
-                                    .setGoodsId(material.getGoodsId())
-                                    .setDeptId(material.getDeptId())
-                                    .setOrderCode(material.getOrderCode())
-                                    .setBatchNo(material.getBatchNo())
-                                    .setExpireDate(material.getExpireDate())
-                                    .setCreateUserId("1")
-                                    .setCreateDate(DateUtils.getCurrentTime());
-                            tagUpdateList.add(tag);
-                        }
-
-                        //删除缓存信息
-                        cacheService.removeCache(CacheCom, TagById, material.getSpdCode());
-                    });
-
-                    // 批量新增和修改信息
-                    if (!tagSaveList.isEmpty()) {
-                        Db.batchSave(tagSaveList, batchSize);
-                    }
-                    if (!tagUpdateList.isEmpty()) {
-                        Db.batchUpdate(tagUpdateList, batchSize);
-                    }
-                }
-
-
-                //TODO 自动绑定标签
-                List<String> orderCodeList = new ArrayList<>();
-                ComService comService = Aop.get(ComService.class);
                 List<Material> materialList = new ArrayList<>();
                 materialList.addAll(saveList);
                 materialList.addAll(updateList);
+
                 materialList.forEach(material -> {
+                    Tag tag = cacheService.getTagById(material.getSpdCode());
+                    if (tag == null) {
+                        tag = new Tag()
+                                .setSpdCode(material.getSpdCode())
+                                .setEpc(null)
+                                .setAccept(TagNo)
 
-                    //过滤相同的配送单号
-                    String orderCode = material.getOrderCode();
-                    if (orderCodeList.contains(orderCode)) {
-                        return;
+                                .setGoodsId(material.getGoodsId())
+                                .setDeptId(material.getDeptId())
+                                .setOrderCode(material.getOrderCode())
+                                .setBatchNo(material.getBatchNo())
+                                .setExpireDate(material.getExpireDate())
+                                .setCreateUserId("1")
+                                .setCreateDate(DateUtils.getCurrentTime());
+                        tagSaveList.add(tag);
+                    } else {
+                        tag
+                                .setGoodsId(material.getGoodsId())
+                                .setDeptId(material.getDeptId())
+                                .setOrderCode(material.getOrderCode())
+                                .setBatchNo(material.getBatchNo())
+                                .setExpireDate(material.getExpireDate())
+                                .setCreateUserId("1")
+                                .setCreateDate(DateUtils.getCurrentTime());
+                        tagUpdateList.add(tag);
                     }
-                    orderCodeList.add(orderCode);
 
-                    //调用标签绑定
-                    List<Record> spdCodeList = Db.find("select spdCode from base_material where orderCode=?", orderCode);
-                    spdCodeList.forEach(item -> {
-                        String spdCode = item.get("spdCode");
-
-                        //TODO 表名替换为标签打印表
-                        logger.info("spdCode:"+spdCode);
-                        Record record = Db.findFirst("select epc,userId from print where caseNbr=?", spdCode);
-                        if(record!=null)
-                            comService.saveTagEpc(spdCode, record.getStr("epc"), record.getStr("userId"));
-                    });
+                    //删除缓存信息
+                    cacheService.removeCache(CacheCom, TagById, material.getSpdCode());
                 });
-            }
-        }
 
-        logger.debug("postBasicData");
+                // 批量新增和修改信息
+                if (!tagSaveList.isEmpty()) {
+                    Db.batchSave(tagSaveList, batchSize);
+                }
+                if (!tagUpdateList.isEmpty()) {
+                    Db.batchUpdate(tagUpdateList, batchSize);
+                }
+            }
+
+
+            //TODO 自动绑定标签
+            List<String> orderCodeList = new ArrayList<>();
+            ComService comService = Aop.get(ComService.class);
+            List<Material> materialList = new ArrayList<>();
+            materialList.addAll(saveList);
+            materialList.addAll(updateList);
+            materialList.forEach(material -> {
+
+                //过滤相同的配送单号
+                String orderCode = material.getOrderCode();
+                if (orderCodeList.contains(orderCode)) {
+                    return;
+                }
+                orderCodeList.add(orderCode);
+
+                //调用标签绑定
+                List<Record> spdCodeList = Db.find("select spdCode from base_material where orderCode=?", orderCode);
+                spdCodeList.forEach(item -> {
+                    String spdCode = item.get("spdCode");
+
+                    //TODO 表名替换为标签打印表
+                    Record record = Db.findFirst("select epc,userId from print where caseNbr=?", spdCode);
+                    if (record != null)
+                        comService.saveTagEpc(spdCode, record.getStr("epc"), record.getStr("userId"));
+                    else{
+                        logger.error("绑定标签失败，print表无此数据：%s",spdCode);
+                    }
+                });
+            });
+//            }
+//        }
+
+            logger.debug("postBasicData");
+        }
     }
 }
