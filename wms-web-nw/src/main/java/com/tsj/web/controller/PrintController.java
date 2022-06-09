@@ -60,7 +60,7 @@ public class PrintController extends MyController {
             printRequest.put("spec", record.getStr("spec"));
             printRequest.put("manufacturerName", record.getStr("manufacturerName"));
             printRequest.put("lotNo", record.getStr("lotNo"));
-            printRequest.put("expireDate", record.getStr("expireDate").substring(0, 10));
+            printRequest.put("expireDate", record.getStr("expireDate"));
             printRequest.put("shelfCode", record.getStr("shelfCode"));
             printRequest.put("comGoodsId", record.getStr("comGoodsId"));
             printRequest.put("caseNbr", record.getStr("caseNbr"));

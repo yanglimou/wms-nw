@@ -22,13 +22,13 @@ public class PrintService extends MyService {
         if(StringUtils.isNotEmpty(insNo)){
             condition+=" and a.insNo='"+insNo+"'";
         }
-        String select = "select a.insNo,a.caseNbr,a.epc,a.userId,a.comGoodsId,a.lotNo,a.expireDate,a.printFlag,a.shelfCode,a.hvFlag,b.name,b.spec,b.unit,c.`name` manufacturerName ";
+        String select = "select a.insNo,a.caseNbr,a.epc,a.userId,a.comGoodsId,a.lotNo,substring(a.expireDate,1,10) expireDate,a.printFlag,a.shelfCode,a.hvFlag,b.name,b.spec,b.unit,c.`name` manufacturerName ";
         String sqlExceptSelect = "  from print a LEFT JOIN base_goods b on a.comGoodsId=b.id left JOIN base_manufacturer c on b.manufacturerId=c.id where 1=1 "+condition+" order by a.printFlag,a.caseNbr ";
         return Db.paginate(pageNumber, pageSize, select, sqlExceptSelect);
     }
 
     public List<Record> findByInsNo(String insNo) {
-        return Db.find("select a.caseNbr,a.epc,a.comGoodsId,a.lotNo,a.expireDate,a.shelfCode,a.hvFlag,b.name,b.spec,b.unit,c.`name` manufacturerName from print a LEFT JOIN base_goods b on a.comGoodsId=b.id left JOIN base_manufacturer c on b.manufacturerId=c.id where a.insNo=?", insNo);
+        return Db.find("select a.caseNbr,a.epc,a.comGoodsId,a.lotNo,substring(a.expireDate,1,10) expireDate,a.shelfCode,a.hvFlag,b.name,b.spec,b.unit,c.`name` manufacturerName from print a LEFT JOIN base_goods b on a.comGoodsId=b.id left JOIN base_manufacturer c on b.manufacturerId=c.id where a.insNo=?", insNo);
     }
 
     public Page<Record> getPrintPage2(int pageNumber, int pageSize) {

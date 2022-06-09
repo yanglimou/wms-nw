@@ -80,7 +80,7 @@ public class RemoveTemp implements ITask {
         String[] tempList = file.list();
         if (tempList != null && tempList.length > 0) {
             for (String path : tempList) {
-                File temp = new File(directoryPath + path);
+                File temp = new File(directoryPath +"/"+ path);
                 int res = new Date(temp.lastModified()).compareTo(dt);
                 if (res < 0) {
                     boolean state = temp.delete();

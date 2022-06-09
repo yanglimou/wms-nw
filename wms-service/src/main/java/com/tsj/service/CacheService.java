@@ -135,6 +135,11 @@ public class CacheService extends MyService {
                 () -> Goods.dao.findById(goodsId));
     }
 
+    public Print getPrintById(String id) {
+        return getObjectFromCache(CacheBase, PrintById, id,
+                () -> Print.dao.findById(id));
+    }
+
     public Dept getDeptById(String deptId) {
         return getObjectFromCache(CacheBase, DeptById, deptId,
                 () -> Dept.dao.findById(deptId));

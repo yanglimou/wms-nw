@@ -300,6 +300,19 @@ public class FileController extends MyController {
     }
 
     @Before(GET.class)
+    @OperateLog("导出盘点记录")
+    public void downloadRecordInventoryNewList() throws Exception {
+        File file = fileService.getRecordInventoryNewFile();
+        if (!file.exists()) {
+            logger.error("导出库存记录失败");
+            renderJson(R.error(ResultCode.FILE_CREATE_FAIL));
+        } else {
+            renderFile(file);
+        }
+    }
+
+
+    @Before(GET.class)
     @NotNull({"deptId"})
     @OperateLog("导出库存明细记录")
     public void downloadStockTagRecordList(String deptId, String goodsId, String cabinetName, String type, String spdCode) throws Exception {

@@ -349,6 +349,26 @@ public class ComService extends MyService {
     }
 
     /**
+     * 保存耗材盘点记录
+     *
+     * @param cabinetId 柜体ID
+     * @param userId    操作人ID
+     * @param epcArray  标签集合
+     * @param time      时间
+     * @return 操作结果
+     */
+    public R saveTagInventoryNew(String cabinetId, String userId, String[] epcArray, String time) {
+        List<RecordInventoryNew> recordInventoryNewList = Arrays.stream(epcArray).map(epc -> new RecordInventoryNew().setCreateDate(time)
+                .setCabinetId(cabinetId)
+                .setSpdCode(epc)
+                .setCreateUserId(userId)
+                .setId(IDGenerator.makeId())
+        ).collect(Collectors.toList());
+        Db.batchSave(recordInventoryNewList, 1000);
+        return R.ok();
+    }
+
+    /**
      * 保存耗材标签注册信息
      *
      * @param goodsId    耗材ID
@@ -1613,38 +1633,36 @@ public class ComService extends MyService {
 
     /**
      * 异常库存耗材手动出库
+     *
      * @param spdCode 耗材唯一码，逗号分隔
      * @return
      */
-    public R removeStockTag(String spdCode)
-    {
-        QueryCondition condition = QueryConditionBuilder.by(Kv.by("spdCode",spdCode), true)
+    public R removeStockTag(String spdCode) {
+        QueryCondition condition = QueryConditionBuilder.by(Kv.by("spdCode", spdCode), true)
                 .put(SysConstant.SQL_PATTERN_IN, "spdCode", "stock.spdCode")
                 .build();
 
         String select = "select stock.*,tag.epc from com_stock_tag stock left join com_tag tag on stock.spdCode=tag.spdCode ";
         List<Record> stockTagList = Db.find(select + condition.getSql(), condition.getParas());
 
-        List<String> noEpcTagList=new ArrayList<>();
+        List<String> noEpcTagList = new ArrayList<>();
 
-        Map<String,List<String>> tagMap=new HashMap<>();
-        stockTagList.forEach(tag->{
+        Map<String, List<String>> tagMap = new HashMap<>();
+        stockTagList.forEach(tag -> {
             String id = tag.getStr("spdCode");
             String epc = tag.getStr("epc");
-            String cabinetId=tag.getStr("cabinetId");
+            String cabinetId = tag.getStr("cabinetId");
 
             //清除缓存
             cacheService.removeCache(CacheCom, TagByEpc, epc);
             cacheService.removeCache(CacheCom, TagById, id);
 
-            if(StringUtils.isEmpty(epc))
-            {
+            if (StringUtils.isEmpty(epc)) {
                 noEpcTagList.add(epc);
                 return;
             }
-            if(!tagMap.containsKey(cabinetId))
-            {
-                tagMap.put(cabinetId,new ArrayList<>());
+            if (!tagMap.containsKey(cabinetId)) {
+                tagMap.put(cabinetId, new ArrayList<>());
             }
             tagMap.get(cabinetId).add(epc);
         });
@@ -1653,7 +1671,7 @@ public class ComService extends MyService {
         noEpcTagList.forEach(StockTag.dao::deleteById);
 
         //执行出库操作
-        tagMap.forEach((cabinetId, epcList)->{
+        tagMap.forEach((cabinetId, epcList) -> {
             saveTagOut(cabinetId, getDefaultUserId(), epcList.toArray(new String[epcList.size()]), DateUtil.now(), "异常库存耗材手动出库", "false", "");
         });
 

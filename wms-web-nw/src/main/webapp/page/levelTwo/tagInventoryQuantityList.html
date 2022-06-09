@@ -146,12 +146,7 @@
 
             //导出
             $(".exportAll_btn").on("click", function () {
-                if ($(".deptId").val()) {
-                    layer.msg("功能待开发");
-
-                } else {
-                    layer.msg("请先选择科室");
-                }
+                location.href = contextPath + "/file/downloadRecordInventoryNewList" + getAccessTokenUrl();
             });
 
             //监听工具条

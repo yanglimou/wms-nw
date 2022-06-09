@@ -1,7 +1,6 @@
 package com.tsj.service;
 
 import cn.hutool.core.date.DateUtil;
-import com.jfinal.aop.Aop;
 import com.jfinal.aop.Inject;
 import com.jfinal.kit.Kv;
 import com.jfinal.log.Log;
@@ -202,7 +201,7 @@ public class SpdService extends MyService {
         try {
             doPostBasicData(type);
         } catch (Exception ignored) {
-            logger.error("错误",ignored);
+            logger.error("错误", ignored);
         }
         isRunning = false;
         return true;
@@ -405,9 +404,11 @@ public class SpdService extends MyService {
                 String ISHV = record.getStr("ISHV");
                 String CREATEDATE = record.getStr("CREATEDATE");
                 String INSNO = record.getStr("INSNO");
-                if (Print.dao.findById(CASE_NBR) == null) {
+                Print printCache = cacheService.getPrintById(CASE_NBR);
+                if (printCache == null) {
                     Print print = new Print().setCaseNbr(CASE_NBR)
-                            .setEpc("474B4854"+("是".equals(ISHV)?"0":"1")+"0" + CASE_NBR)
+//                            .setEpc("474B4854" + ("是".equals(ISHV) ? "0" : "1") + "0" + CASE_NBR)
+                            .setEpc("474B485400" + CASE_NBR)
                             .setOrderCode(ORDER_CODE)
                             .setComGoodsId(COM_GOODS_ID)
                             .setLotNo(LOT_NO)
@@ -432,7 +433,6 @@ public class SpdService extends MyService {
 
         //同步制标{退中心库的耗材唯一码会被重新使用，本地需要判断后覆盖}
 //        String deptNames = CommonConfig.prop.get("spd.deptName");
-//        if (isMaterial && StringUtils.isNotEmpty(deptNames)) {
         if (isMaterial) {
             int lastDays = CommonConfig.prop.getInt("spd.lastDays", 7);
             String QueryEndDate = DateUtils.getCurrentTime();
@@ -447,10 +447,8 @@ public class SpdService extends MyService {
 
             List<Material> saveList = new ArrayList<>();
             List<Material> updateList = new ArrayList<>();
-//                List<Record> recordList = HttpKit.postSpdData(SPD_BASE_URL + SpdUrl.URL_TAG.getUrl(), "CREATEDATE",
-//                        Kv.by("QueryBeginDate", QueryBeginDate).set("QueryEndDate", QueryEndDate).set("DeptId", dept.getId()));
-
             List<Record> recordList = HttpKit.postSpdData(SPD_BASE_URL + SpdUrl.URL_TAG.getUrl(), "CREATEDATE",
+//                        Kv.by("QueryBeginDate", QueryBeginDate).set("QueryEndDate", QueryEndDate).set("DeptId", dept.getId()));
                     Kv.by("QueryBeginDate", QueryBeginDate).set("QueryEndDate", QueryEndDate));
             logger.info("同步制标数量:" + recordList.size());
 
@@ -558,39 +556,36 @@ public class SpdService extends MyService {
             }
 
 
-            //TODO 自动绑定标签
-            List<String> orderCodeList = new ArrayList<>();
-            ComService comService = Aop.get(ComService.class);
-            List<Material> materialList = new ArrayList<>();
-            materialList.addAll(saveList);
-            materialList.addAll(updateList);
-            materialList.forEach(material -> {
-
-                //过滤相同的配送单号
-                String orderCode = material.getOrderCode();
-                if (orderCodeList.contains(orderCode)) {
-                    return;
-                }
-                orderCodeList.add(orderCode);
-
-                //调用标签绑定
-                List<Record> spdCodeList = Db.find("select spdCode from base_material where orderCode=?", orderCode);
-                spdCodeList.forEach(item -> {
-                    String spdCode = item.get("spdCode");
-
-                    //TODO 表名替换为标签打印表
-                    Record record = Db.findFirst("select epc,userId from print where caseNbr=?", spdCode);
-                    if (record != null)
-                        comService.saveTagEpc(spdCode, record.getStr("epc"), record.getStr("userId"));
-                    else{
-                        logger.error("绑定标签失败，print表无此数据：%s",spdCode);
-                    }
-                });
-            });
+//                //TODO 自动绑定标签
+//                List<String> orderCodeList = new ArrayList<>();
+//                ComService comService = Aop.get(ComService.class);
+//                List<Material> materialList = new ArrayList<>();
+//                materialList.addAll(saveList);
+//                materialList.addAll(updateList);
+//                materialList.forEach(material -> {
+//
+//                    //过滤相同的配送单号
+//                    String orderCode = material.getOrderCode();
+//                    if (orderCodeList.contains(orderCode)) {
+//                        return;
+//                    }
+//                    orderCodeList.add(orderCode);
+//
+//                    //调用标签绑定
+//                    List<Record> spdCodeList = Db.find("select spdCode from base_material where orderCode=?", orderCode);
+//                    spdCodeList.forEach(item -> {
+//                        String spdCode = item.get("spdCode");
+//
+//                        //TODO 表名替换为标签打印表
+//                        logger.info("spdCode:"+spdCode);
+//                        Record record = Db.findFirst("select epc,userId from print where caseNbr=?", spdCode);
+//                        if(record!=null)
+//                            comService.saveTagEpc(spdCode, record.getStr("epc"), record.getStr("userId"));
+//                    });
+//                });
 //            }
-//        }
-
-            logger.debug("postBasicData");
         }
+
+        logger.debug("postBasicData");
     }
 }

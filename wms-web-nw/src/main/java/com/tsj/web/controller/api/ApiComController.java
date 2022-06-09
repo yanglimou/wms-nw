@@ -95,6 +95,18 @@ public class ApiComController extends MyController {
         renderJson(result);
     }
 
+
+    @Before(POST.class)
+    @NotNull({"cabinetId", "time", "userId"})
+    @OperateLog("保存盘点记录new")
+    public void saveTagInventoryNew(String epc, String cabinetId, String userId, String time,
+                                 @IgnoreParameter UploadFile file) {
+        if (StringUtils.isEmpty(epc))
+            epc = "";
+        R result = comService.saveTagInventoryNew(cabinetId, userId, epc.split(","), time);
+        renderJson(result);
+    }
+
     @Before(POST.class)
     @NotNull({"goodsId", "batchNo", "expireDate", "epc", "userId", "deptId", "orderCode"})
     @OperateLog("保存注册标签")

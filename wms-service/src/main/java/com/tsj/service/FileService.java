@@ -642,6 +642,51 @@ public class FileService extends MyService {
         return new File(filePath);
     }
 
+    public File getRecordInventoryNewFile() throws Exception {
+
+
+        String select = "SELECT\n" +
+                "\tc.`name` AS deptName,\n" +
+                "\td.`name` AS cabinetName,\n" +
+                "\te.`name` AS goodsName,\n" +
+                "\te.spec,\n" +
+                "\te.unit,\n" +
+                "\tf.`name` AS manufacturerName,\n" +
+                "\ta.spdCode,\n" +
+                "\tb.epc,\n" +
+                "\tb.expireDate,\n" +
+                "\tb.batchNo,\n" +
+                "\ta.createDate\n" +
+                "FROM\n" +
+                "\tcom_record_inventory_new a\n" +
+                "LEFT JOIN com_tag b ON a.spdCode = b.spdCode\n" +
+                "LEFT JOIN base_dept c ON b.deptId = c.id\n" +
+                "LEFT JOIN base_cabinet d ON a.cabinetId = d.id\n" +
+                "LEFT JOIN base_goods e ON b.goodsId = e.id\n" +
+                "LEFT JOIN base_manufacturer f ON e.manufacturerId = f.id";
+        List<Record> recordList = Db.find(select);
+
+        List<String[]> list = new ArrayList<>();
+        recordList.forEach(record -> {
+            String[] array = new String[11];
+            int cells = 0;
+            array[cells++] = record.getStr("deptName");
+            array[cells++] = record.getStr("cabinetName");
+            array[cells++] = record.getStr("goodsName");
+            array[cells++] = record.getStr("spec");
+            array[cells++] = record.getStr("unit");
+            array[cells++] = record.getStr("manufacturerName");
+            array[cells++] = record.getStr("spdCode");
+            array[cells++] = record.getStr("epc");
+            array[cells++] = record.getStr("expireDate");
+            array[cells++] = record.getStr("batchNo");
+            array[cells++] = record.getStr("createDate");
+            list.add(array);
+        });
+        String filePath = ExcelKit.putObjectListToExcel(FileConstant.TEMPLATE_PATH + SysConstant.TEMPLATE_RECORD_INVENTORY_NEW, 2, 11, list, list.size());
+        return new File(filePath);
+    }
+
     public File getTagStockRecordToFile(Kv cond) throws Exception {
         String expireBeforeMonth = sysService.getConfig("cabinet", "expireBeforeMonth").getValue();
         String date = DateUtils.addMonth(DateUtils.getCurrentDate(), Integer.parseInt(expireBeforeMonth));

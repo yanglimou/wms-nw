@@ -28,6 +28,7 @@ public class _MappingKit {
         arp.addMapping("com_record_inout_exception", "id", RecordInoutException.class);
         arp.addMapping("com_record_inventory", "id", RecordInventory.class);
         arp.addMapping("com_record_inventory_difference", "id", RecordInventoryDifference.class);
+        arp.addMapping("com_record_inventory_new", "id", RecordInventoryNew.class);
         arp.addMapping("com_record_out", "id", RecordOut.class);
         arp.addMapping("com_stock_base", "id", StockBase.class);
         arp.addMapping("com_stock_tag", "spdCode", StockTag.class);

@@ -70,6 +70,7 @@ public abstract class SysConstant {
     public static final String ManufacturerById = "ManufacturerById@";
     public static final String SupplierById = "SupplierById@";
     public static final String GoodsById = "GoodsById@";
+    public static final String PrintById = "PrintById@";
     public static final String UserById = "UserById@";
     public static final String DeptById = "DeptById@";
     public static final String CabinetById = "CabinetById@";
@@ -99,6 +100,7 @@ public abstract class SysConstant {
     public static final String TEMPLATE_TAG_INOUT = "tempTagInOutList.xls";
     public static final String TEMPLATE_TAG_INOUT_RECORD = "tempTagInOutRecordList.xls";
     public static final String TEMPLATE_TAG_STOCK = "tempTagStockList.xls";
+    public static final String TEMPLATE_RECORD_INVENTORY_NEW = "tempRecordInventoryNewList.xls";
     public static final String TEMPLATE_TAG_STOCK_RECORD = "tempTagStockRecordList.xls";
 
     /**
