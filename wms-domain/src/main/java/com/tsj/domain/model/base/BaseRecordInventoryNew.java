@@ -27,13 +27,13 @@ public abstract class BaseRecordInventoryNew<M extends BaseRecordInventoryNew<M>
 		return getStr("cabinetId");
 	}
 	
-	public M setSpdCode(String spdCode) {
-		set("spdCode", spdCode);
+	public M setEpc(String epc) {
+		set("epc", epc);
 		return (M)this;
 	}
 	
-	public String getSpdCode() {
-		return getStr("spdCode");
+	public String getEpc() {
+		return getStr("epc");
 	}
 	
 	public M setCreateUserId(String createUserId) {

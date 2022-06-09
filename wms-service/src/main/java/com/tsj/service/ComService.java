@@ -360,11 +360,16 @@ public class ComService extends MyService {
     public R saveTagInventoryNew(String cabinetId, String userId, String[] epcArray, String time) {
         List<RecordInventoryNew> recordInventoryNewList = Arrays.stream(epcArray).map(epc -> new RecordInventoryNew().setCreateDate(time)
                 .setCabinetId(cabinetId)
-                .setSpdCode(epc)
+                .setEpc(epc)
                 .setCreateUserId(userId)
                 .setId(IDGenerator.makeId())
         ).collect(Collectors.toList());
-        Db.batchSave(recordInventoryNewList, 1000);
+        Db.tx(()->{
+            Db.delete("delete from com_record_inventory_new");
+            Db.batchSave(recordInventoryNewList, 1000);
+            return true;
+        });
+
         return R.ok();
     }
 

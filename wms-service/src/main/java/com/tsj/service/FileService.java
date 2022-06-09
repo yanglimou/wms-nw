@@ -652,18 +652,19 @@ public class FileService extends MyService {
                 "\te.spec,\n" +
                 "\te.unit,\n" +
                 "\tf.`name` AS manufacturerName,\n" +
-                "\ta.spdCode,\n" +
-                "\tb.epc,\n" +
+                "\ta.epc,\n" +
+                "\tb.spdCode,\n" +
                 "\tb.expireDate,\n" +
                 "\tb.batchNo,\n" +
                 "\ta.createDate\n" +
                 "FROM\n" +
                 "\tcom_record_inventory_new a\n" +
-                "LEFT JOIN com_tag b ON a.spdCode = b.spdCode\n" +
+                "LEFT JOIN com_tag b ON a.epc = b.epc\n" +
                 "LEFT JOIN base_dept c ON b.deptId = c.id\n" +
                 "LEFT JOIN base_cabinet d ON a.cabinetId = d.id\n" +
                 "LEFT JOIN base_goods e ON b.goodsId = e.id\n" +
-                "LEFT JOIN base_manufacturer f ON e.manufacturerId = f.id";
+                "LEFT JOIN base_manufacturer f ON e.manufacturerId = f.id\n" +
+                "where b.epc is not null order by b.goodsId";
         List<Record> recordList = Db.find(select);
 
         List<String[]> list = new ArrayList<>();
