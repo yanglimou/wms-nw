@@ -465,7 +465,7 @@ public class SpdService extends MyService {
                             .setExpireDate(record.getStr("EXPIRE_DATE").replace("T", " "))
                             .setCreateDate(record.getStr("CREATEDATE"));
                     saveList.add(material);
-                } else if (!material.getCreateDate().equals(record.getStr("CREATEDATE"))) {
+                } else if (record.getStr("CREATEDATE").compareTo(material.getCreateDate())>0) {
                     material.setDeptId(record.getStr("DEPOT_ID"))
                             .setOrderCode(record.getStr("ORDER_CODE"))
                             .setGoodsId(record.getStr("COM_GOODS_ID"))
@@ -473,7 +473,6 @@ public class SpdService extends MyService {
                             .setExpireDate(record.getStr("EXPIRE_DATE").replace("T", " "))
                             .setCreateDate(record.getStr("CREATEDATE"));
                     updateList.add(material);
-
                     cacheService.removeCache(CacheBase, MaterialById, CASE_NBR);
                 }
             });
@@ -485,10 +484,13 @@ public class SpdService extends MyService {
                 Db.batchUpdate(updateList, batchSize);
             }
 
+            List<Material> materialList = new ArrayList<>();
+            materialList.addAll(saveList);
+            materialList.addAll(updateList);
+
 
             //TODO 自动创建配送单
-            List<Order> orderList = new ArrayList<>();
-            saveList.forEach(material -> {
+            materialList.forEach(material -> {
                 Order order = cacheService.getOrderByCode(material.getOrderCode());
                 if (order == null) {
                     Order newOrder = new Order();
@@ -498,22 +500,15 @@ public class SpdService extends MyService {
                     newOrder.setCreateDate(DateUtil.now());
                     //初始状态为待复核
                     newOrder.setState(SysConstant.StateNeedConfirm);
-                    orderList.add(newOrder);
+                    newOrder.save();
                 }
             });
-            if (!orderList.isEmpty()) {
-                Db.batchSave(orderList, batchSize);
-            }
+
 
             //TODO 自动创建标签记录
             if (true) {
                 List<Tag> tagSaveList = new ArrayList<>();
                 List<Tag> tagUpdateList = new ArrayList<>();
-
-                List<Material> materialList = new ArrayList<>();
-                materialList.addAll(saveList);
-                materialList.addAll(updateList);
-
                 materialList.forEach(material -> {
                     Tag tag = cacheService.getTagById(material.getSpdCode());
                     if (tag == null) {
