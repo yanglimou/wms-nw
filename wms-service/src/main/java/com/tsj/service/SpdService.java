@@ -45,7 +45,7 @@ public class SpdService extends MyService {
         try {
             List<Tag> tagList = new ArrayList<>();
             List<Record> recordList = HttpKit.postSpdData(SPD_BASE_URL + SpdUrl.URL_STOCK_TAG.getUrl(), null,
-                    Kv.by("DeptId", "10021004"));
+                    Kv.by("DeptId", deptId));
 
             //查询该科室的标签唯一码集合
             Set<String> spdCodeSet = Db.find("select spdCode from com_tag where deptId=?", deptId).stream().map(record -> record.getStr("spdCode")).collect(Collectors.toSet());
