@@ -42,7 +42,7 @@
     <table id="recordInList" lay-filter="recordInList"></table>
 
     <script type="text/html" id="recordInListBar">
-        <a class="layui-btn layui-btn-xs" lay-event="detail"><i class="layui-icon">&#xe601;</i>耗材明细</a>
+        <a class="layui-btn layui-btn-xs" lay-event="detail"><i class="layui-icon">&#xe601;</i>导出明细</a>
     </script>
 
     <script type="text/javascript" src="../../layui/layui.js"></script>
@@ -69,7 +69,7 @@
                 , method: 'GET'   //laui 修改请求方式
                 , cellMinWidth: 95
                 , cols: [[ //表头
-                     { field: 'createDate', title: '库存时间', width: 200, align: "center" }
+                     { field: 'createDate', title: '盘点时间', width: 200, align: "center" }
                     , { field: 'num', title: '盘点数量', width: 200, align: "center" }
                     , { title: '操作', templet: '#recordInListBar', width: 120, fixed: "right", align: "center" }
                 ]]
