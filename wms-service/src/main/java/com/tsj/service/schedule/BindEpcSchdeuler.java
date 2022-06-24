@@ -6,6 +6,7 @@ import com.jfinal.log.Log;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.cron4j.ITask;
+import com.tsj.common.config.CommonConfig;
 import com.tsj.service.CacheService;
 import org.apache.commons.lang3.StringUtils;
 
@@ -28,6 +29,9 @@ public class BindEpcSchdeuler implements ITask {
 
     @Override
     public void run() {
+        if (!CommonConfig.prop.getBoolean("spd")) {
+            return;
+        }
         CacheService cacheService = Aop.get(CacheService.class);
         String sql = "select spdCode from com_tag where epc is null";
         List<String> spdCodeList = Db.query(sql);

@@ -11,26 +11,27 @@ import com.jfinal.upload.UploadFile;
 import com.tsj.common.annotation.IgnoreParameter;
 import com.tsj.common.annotation.NotNull;
 import com.tsj.common.annotation.OperateLog;
+import com.tsj.common.config.CommonConfig;
 import com.tsj.common.constant.FileConstant;
 import com.tsj.common.constant.ResultCode;
 import com.tsj.common.constant.SysConstant;
-import com.tsj.common.utils.DateTimeUtils;
-import com.tsj.common.utils.DateUtils;
 import com.tsj.common.utils.FileKit;
 import com.tsj.common.utils.R;
-import com.tsj.domain.model.*;
+import com.tsj.domain.model.Cabinet;
+import com.tsj.domain.model.Order;
+import com.tsj.domain.model.Tag;
 import com.tsj.service.CacheService;
 import com.tsj.service.ComService;
 import com.tsj.service.SpdService;
-import com.tsj.common.config.CommonConfig;
 import com.tsj.service.interceptor.AuthInterceptor;
+import com.tsj.service.spdStockTag.SpdStockTagContainer;
+import com.tsj.web.common.MyController;
 import com.tsj.web.hikvision.HikVision;
 import org.apache.commons.lang3.StringUtils;
-import com.tsj.web.common.MyController;
 
-import java.text.ParseException;
 import java.util.List;
-import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @className: ApiComController
@@ -97,10 +98,10 @@ public class ApiComController extends MyController {
 
 
     @Before(POST.class)
-    @NotNull({"cabinetId", "time", "userId"})
+    @NotNull({"time", "userId"})
     @OperateLog("保存盘点记录new")
     public void saveTagInventoryNew(String epc, String cabinetId, String userId, String time,
-                                 @IgnoreParameter UploadFile file) {
+                                    @IgnoreParameter UploadFile file) {
         if (StringUtils.isEmpty(epc))
             epc = "";
         R result = comService.saveTagInventoryNew(cabinetId, userId, epc.split(","), time);
@@ -273,14 +274,13 @@ public class ApiComController extends MyController {
     @OperateLog("查询标签，根据EPC")
     public void getTag(String epc) {
         String[] epcArray = epc.split(",");
-
+        Set<String> spdSet = SpdStockTagContainer.getAll();
         List<Tag> tagList = null;
         if (epcArray[0].length() == 24) {
-            tagList = comService.getTagListByEpc(epcArray);
+            tagList = comService.getTagListByEpc(epcArray).stream().filter(tag -> spdSet.contains(tag.getSpdCode())).collect(Collectors.toList());
         } else {
-            tagList = comService.getTagListByEpcFuzzy(epcArray);
+            tagList = comService.getTagListByEpcFuzzy(epcArray).stream().filter(tag -> spdSet.contains(tag.getSpdCode())).collect(Collectors.toList());
         }
-
         renderJson(R.ok().putData(tagList));
     }
 

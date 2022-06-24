@@ -16,6 +16,7 @@ import com.tsj.common.utils.IDGenerator;
 import com.tsj.common.utils.R;
 import com.tsj.domain.model.*;
 import com.tsj.service.common.MyService;
+import com.tsj.service.spdStockTag.SpdStockTagContainer;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -44,24 +45,25 @@ public class SpdService extends MyService {
         }
         try {
             List<Tag> tagList = new ArrayList<>();
-            List<Record> recordList = HttpKit.postSpdData(SPD_BASE_URL + SpdUrl.URL_STOCK_TAG.getUrl(), null,
-                    Kv.by("DeptId", deptId));
+            Set<String> spdCodeSetFromSpd = SpdStockTagContainer.getByDept(deptId);
+//            List<Record> recordList = HttpKit.postSpdData(SPD_BASE_URL + SpdUrl.URL_STOCK_TAG.getUrl(), null,
+//                    Kv.by("DeptId", deptId));
 
             //查询该科室的标签唯一码集合
-            Set<String> spdCodeSet = Db.find("select spdCode from com_tag where deptId=?", deptId).stream().map(record -> record.getStr("spdCode")).collect(Collectors.toSet());
+            Set<String> spdCodeSetFromComTag = Db.find("select spdCode from com_tag where deptId=?", deptId).stream().map(record -> record.getStr("spdCode")).collect(Collectors.toSet());
 
-            recordList.forEach(record -> {
-                String CASE_NBR = record.getStr("CASE_NBR");
-                if (!spdCodeSet.contains(CASE_NBR))
+            spdCodeSetFromSpd.forEach(spdCode -> {
+//                String CASE_NBR = record.getStr("CASE_NBR");
+                if (!spdCodeSetFromComTag.contains(spdCode))
                     return;
 
-                Tag tag = cacheService.getTagById(CASE_NBR);
+                Tag tag = cacheService.getTagById(spdCode);
                 if (tag != null) {
                     tagList.add(tag);
                 }
             });
 
-            logger.info("查询SPD库存记录总数：%d（条），可识别的标签记录数：%d（条） ", recordList.size(), tagList.size());
+            logger.info("查询SPD库存记录总数：%d（条），可识别的标签记录数：%d（条） ", spdCodeSetFromSpd.size(), tagList.size());
 
             return R.ok().putData(tagList);
         } catch (Exception ex) {

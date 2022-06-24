@@ -642,9 +642,7 @@ public class FileService extends MyService {
         return new File(filePath);
     }
 
-    public File getRecordInventoryNewFile() throws Exception {
-
-
+    public File getRecordInventoryNewFile(String createDate) throws Exception {
         String select = "SELECT\n" +
                 "\tc.`name` AS deptName,\n" +
                 "\td.`name` AS cabinetName,\n" +
@@ -664,7 +662,7 @@ public class FileService extends MyService {
                 "LEFT JOIN base_cabinet d ON a.cabinetId = d.id\n" +
                 "LEFT JOIN base_goods e ON b.goodsId = e.id\n" +
                 "LEFT JOIN base_manufacturer f ON e.manufacturerId = f.id\n" +
-                "where b.epc is not null order by b.goodsId";
+                "where a.createDate='"+createDate+"' and b.epc is not null order by b.goodsId";
         List<Record> recordList = Db.find(select);
 
         List<String[]> list = new ArrayList<>();

@@ -149,6 +149,14 @@ public class ComController extends MyController {
 
     @Before(GET.class)
     @NotNull({"page", "limit"})
+    @OperateLog("无库存查询盘点统计分页")
+    public void getTagInventoryQuantityListNoStock(int page, int limit) {
+        Page<Record> pageData = comService.getTagInventoryNoStock(page, limit);
+        renderJson(R.ok().putData(pageData.getList()).put("count", pageData.getTotalRow()));
+    }
+
+    @Before(GET.class)
+    @NotNull({"page", "limit"})
     @OperateLog("查询盘点明细分页")
     public void getTagInventoryListByInventoryDifferenceId(String inventoryDifferenceId, int page, int limit) {
         Page<Record> pageData = comService.getTagInventoryListPage(page, limit, inventoryDifferenceId);

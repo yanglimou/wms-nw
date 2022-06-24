@@ -33,9 +33,6 @@
             <div class="layui-input-inline">
                 <a class="layui-btn search_btn" data-type="reload"><i class="layui-icon">&#xe615;</i>查询</a>
             </div>
-            <div class="layui-inline">
-                <a class="layui-btn layui-btn-normal exportAll_btn"><i class="layui-icon">&#xe601;</i>批量导出</a>
-            </div>
         </form>
     </blockquote>
 
@@ -144,10 +141,6 @@
                 });
             });
 
-            //导出
-            $(".exportAll_btn").on("click", function () {
-                location.href = contextPath + "/file/downloadRecordInventoryNewList" + getAccessTokenUrl();
-            });
 
             //监听工具条
             table.on('tool(recordInList)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"

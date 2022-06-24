@@ -3,7 +3,7 @@ jfinal.devMode = true
 jfinal.generateTestData = true
 
 #SPD
-spd = true
+spd = false
 spd.lastDays = 7
 spd.defaultUserId = 1
 spd.deptName=手术麻醉中心,SPD院内运营中心

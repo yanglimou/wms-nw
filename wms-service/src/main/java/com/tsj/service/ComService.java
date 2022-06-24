@@ -126,38 +126,16 @@ public class ComService extends MyService {
             //柜内转移，直接更改库存状态
             StockTag stockTag = StockTag.dao.findById(tag.getSpdCode());
             if (stockTag != null) {
-                stockTag.setCabinetId(cabinetId)
-                        .setDeptId(cabinet.getDeptId())
-                        .setCreateDate(time);
+                stockTag.setCabinetId(cabinetId).setDeptId(cabinet.getDeptId()).setCreateDate(time);
                 updateStockTagList.add(stockTag);
                 return;
             }
 
             //柜外退回，增加入柜记录，更改库存状态，判断首次入柜
-            RecordIn recordIn = new RecordIn()
-                    .setId(IDGenerator.makeId())
-                    .setExceptionDescId(recordInOutExceptionId)
-                    .setGoodsId(tag.getGoodsId())
-                    .setSpdCode(tag.getSpdCode())
-                    .setCabinetId(cabinetId)
-                    .setConfirmed(confirmed)
-                    .setCreateUserId(userId)
-                    .setCreateDate(time)
-                    .setUpload(UploadFailed)
-                    .setType(tag.getAccept());
+            RecordIn recordIn = new RecordIn().setId(IDGenerator.makeId()).setExceptionDescId(recordInOutExceptionId).setGoodsId(tag.getGoodsId()).setSpdCode(tag.getSpdCode()).setCabinetId(cabinetId).setConfirmed(confirmed).setCreateUserId(userId).setCreateDate(time).setUpload(UploadFailed).setType(tag.getAccept());
             recordInList.add(recordIn);
 
-            stockTag = new StockTag()
-                    .setSpdCode(tag.getSpdCode())
-                    .setGoodsId(tag.getGoodsId())
-                    .setBatchNo(tag.getBatchNo())
-                    .setExpireDate(tag.getExpireDate())
-                    .setCabinetId(cabinetId)
-                    .setCreateUserId(userId)
-                    .setCreateDate(time)
-                    .setDeptId(cabinet.getDeptId())
-                    .setManufacturerId(goods.getManufacturerId())
-                    .setSupplierId(goods.getSupplierId());
+            stockTag = new StockTag().setSpdCode(tag.getSpdCode()).setGoodsId(tag.getGoodsId()).setBatchNo(tag.getBatchNo()).setExpireDate(tag.getExpireDate()).setCabinetId(cabinetId).setCreateUserId(userId).setCreateDate(time).setDeptId(cabinet.getDeptId()).setManufacturerId(goods.getManufacturerId()).setSupplierId(goods.getSupplierId());
             addStockTagList.add(stockTag);
 
             //判断入库耗材配送单号
@@ -174,14 +152,7 @@ public class ComService extends MyService {
                 cacheService.removeCache(CacheCom, TagByEpc, tag.getEpc());
             }
         });
-        RecordInoutException recordInoutException = new RecordInoutException()
-                .setId(recordInOutExceptionId)
-                .setType(SysConstant.TagIn)
-                .setQuantity(recordInList.size())
-                .setExceptionDesc(exceptionDesc)
-                .setCabinetId(cabinetId)
-                .setCreateUserId(userId)
-                .setCreateDate(time);
+        RecordInoutException recordInoutException = new RecordInoutException().setId(recordInOutExceptionId).setType(SysConstant.TagIn).setQuantity(recordInList.size()).setExceptionDesc(exceptionDesc).setCabinetId(cabinetId).setCreateUserId(userId).setCreateDate(time);
 
         //保存入柜记录,更新库存标签
         boolean succeed = Db.tx(() -> {
@@ -225,28 +196,11 @@ public class ComService extends MyService {
         filterTag(epcArray, StockOut, cabinetId).forEach(tag -> {
             spdCodeList.add(tag.getSpdCode());
 
-            RecordOut recordOut = new RecordOut()
-                    .setId(IDGenerator.makeId())
-                    .setExceptionDescId(recordInOutExceptionId)
-                    .setGoodsId(tag.getGoodsId())
-                    .setSpdCode(tag.getSpdCode())
-                    .setCabinetId(cabinetId)
-                    .setConfirmed(confirmed)
-                    .setPatientNo(patientNo)
-                    .setCreateUserId(userId)
-                    .setCreateDate(time)
-                    .setUpload(UploadFailed);
+            RecordOut recordOut = new RecordOut().setId(IDGenerator.makeId()).setExceptionDescId(recordInOutExceptionId).setGoodsId(tag.getGoodsId()).setSpdCode(tag.getSpdCode()).setCabinetId(cabinetId).setConfirmed(confirmed).setPatientNo(patientNo).setCreateUserId(userId).setCreateDate(time).setUpload(UploadFailed);
             recordOutList.add(recordOut);
         });
 
-        RecordInoutException recordInoutException = new RecordInoutException()
-                .setId(recordInOutExceptionId)
-                .setType(SysConstant.TagOut)
-                .setQuantity(recordOutList.size())
-                .setExceptionDesc(exceptionDesc)
-                .setCabinetId(cabinetId)
-                .setCreateUserId(userId)
-                .setCreateDate(time);
+        RecordInoutException recordInoutException = new RecordInoutException().setId(recordInOutExceptionId).setType(SysConstant.TagOut).setQuantity(recordOutList.size()).setExceptionDesc(exceptionDesc).setCabinetId(cabinetId).setCreateUserId(userId).setCreateDate(time);
 
         //保存出柜记录,更新库存标签
         boolean succeed = Db.tx(() -> {
@@ -303,16 +257,7 @@ public class ComService extends MyService {
         tagMap.forEach((spdCode, state) -> {
             //生成盘点记录
             Tag tag = Tag.dao.findById(spdCode);
-            RecordInventory recordInventory = new RecordInventory()
-                    .setId(IDGenerator.makeId())
-                    .setInventoryDifferenceId(recordInventoryDifferenceId)
-                    .setCabinetId(cabinetId)
-                    .setGoodsId(tag.getGoodsId())
-                    .setSpdCode(tag.getSpdCode())
-                    .setCreateUserId(userId)
-                    .setCreateDate(time)
-                    .setState(state)
-                    .setUpload(UploadFailed);
+            RecordInventory recordInventory = new RecordInventory().setId(IDGenerator.makeId()).setInventoryDifferenceId(recordInventoryDifferenceId).setCabinetId(cabinetId).setGoodsId(tag.getGoodsId()).setSpdCode(tag.getSpdCode()).setCreateUserId(userId).setCreateDate(time).setState(state).setUpload(UploadFailed);
             recordInventoryList.add(recordInventory);
 
             if (state.equals(InventoryMore)) {
@@ -327,13 +272,7 @@ public class ComService extends MyService {
         saveTagIn(cabinetId, getDefaultUserId(), String.join(",", epcInList).split(","), time, "盘盈自动入库", "false");
 
         //保存差异
-        RecordInventoryDifference recordInventoryDifference = new RecordInventoryDifference()
-                .setId(recordInventoryDifferenceId)
-                .setCabinetId(cabinetId)
-                .setDeptId(cabinet.getDeptId())
-                .setCreateUserId(userId)
-                .setCreateDate(time)
-                .setStockActual(recordList.size() + epcInList.size() - epcOutList.size())//实际盘点数
+        RecordInventoryDifference recordInventoryDifference = new RecordInventoryDifference().setId(recordInventoryDifferenceId).setCabinetId(cabinetId).setDeptId(cabinet.getDeptId()).setCreateUserId(userId).setCreateDate(time).setStockActual(recordList.size() + epcInList.size() - epcOutList.size())//实际盘点数
                 .setStockTheory(recordList.size())//理论盘点数
                 .setStockMore(epcInList.size())//盘盈数
                 .setStockLess(epcOutList.size());//盘亏数
@@ -358,14 +297,9 @@ public class ComService extends MyService {
      * @return 操作结果
      */
     public R saveTagInventoryNew(String cabinetId, String userId, String[] epcArray, String time) {
-        List<RecordInventoryNew> recordInventoryNewList = Arrays.stream(epcArray).map(epc -> new RecordInventoryNew().setCreateDate(time)
-                .setCabinetId(cabinetId)
-                .setEpc(epc)
-                .setCreateUserId(userId)
-                .setId(IDGenerator.makeId())
-        ).collect(Collectors.toList());
-        Db.tx(()->{
-            Db.delete("delete from com_record_inventory_new");
+        List<RecordInventoryNew> recordInventoryNewList = Arrays.stream(epcArray).map(epc -> new RecordInventoryNew().setCreateDate(time).setCabinetId(cabinetId).setEpc(epc).setCreateUserId(userId).setId(IDGenerator.makeId())).collect(Collectors.toList());
+        Db.tx(() -> {
+//            Db.delete("delete from com_record_inventory_new");
             Db.batchSave(recordInventoryNewList, 1000);
             return true;
         });
@@ -413,18 +347,7 @@ public class ComService extends MyService {
 
         //EPC删除前缀标识生成唯一码
         String spdCode = IDGenerator.makeId();
-        return new Tag()
-                .setSpdCode(spdCode)
-                .setDeptId(deptId)
-                .setOrderCode(orderCode)
-                .setGoodsId(goodsId)
-                .setEpc(epc)
-                .setBatchNo(batchNo)
-                .setExpireDate(expireDate)
-                .setCreateUserId(userId)
-                .setCreateDate(time)
-                .setAccept(TagNo)
-                .save() ? R.ok() : R.error(ResultCode.CREATE_FAIL, "标签注册失败");
+        return new Tag().setSpdCode(spdCode).setDeptId(deptId).setOrderCode(orderCode).setGoodsId(goodsId).setEpc(epc).setBatchNo(batchNo).setExpireDate(expireDate).setCreateUserId(userId).setCreateDate(time).setAccept(TagNo).save() ? R.ok() : R.error(ResultCode.CREATE_FAIL, "标签注册失败");
     }
 
     /**
@@ -458,17 +381,7 @@ public class ComService extends MyService {
             cacheService.removeCache(CacheCom, TagByEpc, epc);
             cacheService.removeCache(CacheCom, TagById, spdCode);
 
-            return new Tag().setEpc(epc)
-                    .setGoodsId(material.getGoodsId())
-                    .setDeptId(material.getDeptId())
-                    .setOrderCode(material.getOrderCode())
-                    .setBatchNo(material.getBatchNo())
-                    .setExpireDate(material.getExpireDate())
-                    .setSpdCode(material.getSpdCode())
-                    .setCreateUserId(userId)
-                    .setCreateDate(DateUtils.getCurrentTime())
-                    .setAccept(TagNo)
-                    .save() ? R.ok() : R.error(ResultCode.CREATE_FAIL);
+            return new Tag().setEpc(epc).setGoodsId(material.getGoodsId()).setDeptId(material.getDeptId()).setOrderCode(material.getOrderCode()).setBatchNo(material.getBatchNo()).setExpireDate(material.getExpireDate()).setSpdCode(material.getSpdCode()).setCreateUserId(userId).setCreateDate(DateUtils.getCurrentTime()).setAccept(TagNo).save() ? R.ok() : R.error(ResultCode.CREATE_FAIL);
         } else {
             if (StringUtils.isNotEmpty(tag.getEpc())) {
                 return R.error(ResultCode.DATA_ALREADY_EXISTED, "耗材已绑定其他标签，请勿重复绑定");
@@ -478,10 +391,7 @@ public class ComService extends MyService {
             cacheService.removeCache(CacheCom, TagByEpc, epc);
             cacheService.removeCache(CacheCom, TagById, spdCode);
 
-            return tag.setEpc(epc)
-                    .setCreateUserId(userId)
-                    .setCreateDate(DateUtil.now())
-                    .update() ? R.ok() : R.error(ResultCode.UPDATE_FAIL);
+            return tag.setEpc(epc).setCreateUserId(userId).setCreateDate(DateUtil.now()).update() ? R.ok() : R.error(ResultCode.UPDATE_FAIL);
         }
     }
 
@@ -541,10 +451,7 @@ public class ComService extends MyService {
         cacheService.removeCache(CacheCom, TagById, tag.getSpdCode());
 
         String createDate = DateUtils.getCurrentTime();
-        return tag.setEpc(null)
-                .setCreateUserId(userId)
-                .setCreateDate(createDate)
-                .update() ? R.ok() : R.error(ResultCode.UPDATE_FAIL);
+        return tag.setEpc(null).setCreateUserId(userId).setCreateDate(createDate).update() ? R.ok() : R.error(ResultCode.UPDATE_FAIL);
     }
 
     /**
@@ -565,11 +472,7 @@ public class ComService extends MyService {
      * @return 查询列表
      */
     public List<Record> getStockTagList(Kv cond) {
-        QueryCondition condition = QueryConditionBuilder.by(cond, true)
-                .put(SQL_PATTERN_EQUAL, "cabinetId", "stock.cabinetId")
-                .put(SQL_PATTERN_EQUAL, "deptId", "stock.deptId")
-                .order(SQL_SORT_ASC, "stock.expireDate,goodsName")
-                .build();
+        QueryCondition condition = QueryConditionBuilder.by(cond, true).put(SQL_PATTERN_EQUAL, "cabinetId", "stock.cabinetId").put(SQL_PATTERN_EQUAL, "deptId", "stock.deptId").order(SQL_SORT_ASC, "stock.expireDate,goodsName").build();
 
         String select = "SELECT stock.*,tag.epc,(SELECT name from base_goods WHERE id=stock.goodsId) as goodsName FROM COM_STOCK_TAG stock left join COM_TAG tag on stock.spdCode = tag.spdCode";
         return Db.find(select + condition.getSql(), condition.getParas());
@@ -582,10 +485,7 @@ public class ComService extends MyService {
      * @return 查询列表
      */
     public List<Record> getStockBaseList(Kv cond) {
-        QueryCondition condition = QueryConditionBuilder.by(cond, true)
-                .put(SQL_PATTERN_EQUAL, "deptId", "deptId")
-                .put(SQL_PATTERN_EQUAL, "goodsId", "goodsId")
-                .build();
+        QueryCondition condition = QueryConditionBuilder.by(cond, true).put(SQL_PATTERN_EQUAL, "deptId", "deptId").put(SQL_PATTERN_EQUAL, "goodsId", "goodsId").build();
 
         String select = "SELECT * FROM COM_STOCK_BASE";
         return Db.find(select + condition.getSql(), condition.getParas());
@@ -598,12 +498,7 @@ public class ComService extends MyService {
      * @return 查询列表
      */
     public List<Record> getShortageList(Kv cond) {
-        QueryCondition condition = QueryConditionBuilder.by(cond, true)
-                .put(SQL_PATTERN_EQUAL, "deptId", "base.deptId")
-                .put(SQL_PATTERN_EQUAL, "goodsId", "base.goodsId")
-                .put(SQL_PATTERN_EQUAL, "manufacturerId", "goods.manufacturerId")
-                .put(SQL_PATTERN_EQUAL, "supplierId", "goods.supplierId")
-                .build();
+        QueryCondition condition = QueryConditionBuilder.by(cond, true).put(SQL_PATTERN_EQUAL, "deptId", "base.deptId").put(SQL_PATTERN_EQUAL, "goodsId", "base.goodsId").put(SQL_PATTERN_EQUAL, "manufacturerId", "goods.manufacturerId").put(SQL_PATTERN_EQUAL, "supplierId", "goods.supplierId").build();
 
         String select = "SELECT base.* from com_stock_base base left join base_goods goods on base.goodsId=goods.id " + condition.getSql();
         List<Record> stockBaseList = Db.find(select, condition.getParas());
@@ -611,8 +506,7 @@ public class ComService extends MyService {
         //根据当前库存量和库存基数比较计算补充量
         stockBaseList.forEach(stockBase -> {
             int supplement = stockBase.getInt("max");
-            Record record = Db.findFirst("SELECT count(spdCode) as quantity from com_stock_tag where deptId=? and goodsId=? group by deptId,goodsId",
-                    stockBase.getStr("deptId"), stockBase.getStr("goodsId"));
+            Record record = Db.findFirst("SELECT count(spdCode) as quantity from com_stock_tag where deptId=? and goodsId=? group by deptId,goodsId", stockBase.getStr("deptId"), stockBase.getStr("goodsId"));
             if (record != null) {
                 supplement = stockBase.getInt("max") - record.getInt("quantity");
             }
@@ -629,18 +523,9 @@ public class ComService extends MyService {
      * @return 查询列表
      */
     public List<Record> getTagInventoryQuantityList(Kv cond) {
-        QueryCondition condition = QueryConditionBuilder.by(cond, true)
-                .put(SQL_PATTERN_BETWEEN, "dateRange", "rd.createDate")
-                .put(SQL_PATTERN_EQUAL, "cabinetId", "rd.cabinetId")
-                .build();
+        QueryCondition condition = QueryConditionBuilder.by(cond, true).put(SQL_PATTERN_BETWEEN, "dateRange", "rd.createDate").put(SQL_PATTERN_EQUAL, "cabinetId", "rd.cabinetId").build();
 
-        String select = "SELECT rd.cabinetId,rd.createDate, rd.createUserId"
-                + ",count(case  when rd.state='normal' or rd.state='less' then 1 else null end) AS totalQuantity"
-                + ",count(case  when rd.state='normal' or rd.state='more' then 1 else null end) AS realQuantity)"
-                + ",count(case  when rd.state='less' or rd.state='more' then 1 else null end) AS differenceQuantity)"
-                + " FROM com_record_inventory rd "
-                + condition.getSql()
-                + " GROUP BY rd.cabinetId, rd.createDate";
+        String select = "SELECT rd.cabinetId,rd.createDate, rd.createUserId" + ",count(case  when rd.state='normal' or rd.state='less' then 1 else null end) AS totalQuantity" + ",count(case  when rd.state='normal' or rd.state='more' then 1 else null end) AS realQuantity)" + ",count(case  when rd.state='less' or rd.state='more' then 1 else null end) AS differenceQuantity)" + " FROM com_record_inventory rd " + condition.getSql() + " GROUP BY rd.cabinetId, rd.createDate";
         return Db.find(select, condition.getParas());
     }
 
@@ -652,13 +537,9 @@ public class ComService extends MyService {
      */
     public List<Record> getTagInventoryRecordList(Kv cond) {
         String date = cond.getStr("dateRange");
-        QueryCondition condition = QueryConditionBuilder.by(cond, false)
-                .put(date.contains(" - ") ? SQL_PATTERN_BETWEEN : SQL_PATTERN_EQUAL, "dateRange", "rd.createDate")
-                .build();
+        QueryCondition condition = QueryConditionBuilder.by(cond, false).put(date.contains(" - ") ? SQL_PATTERN_BETWEEN : SQL_PATTERN_EQUAL, "dateRange", "rd.createDate").build();
 
-        String select = "SELECT rd.*,tag.batchNo,tag.expireDate FROM com_record_inventory rd LEFT JOIN com_tag tag ON rd.spdCode = tag.spdCode "
-                + " WHERE rd.cabinetId in (SELECT id from base_cabinet where deptId='" + cond.getStr("deptId") + "')"
-                + condition.getSql();
+        String select = "SELECT rd.*,tag.batchNo,tag.expireDate FROM com_record_inventory rd LEFT JOIN com_tag tag ON rd.spdCode = tag.spdCode " + " WHERE rd.cabinetId in (SELECT id from base_cabinet where deptId='" + cond.getStr("deptId") + "')" + condition.getSql();
         return Db.find(select, condition.getParas());
     }
 
@@ -669,15 +550,9 @@ public class ComService extends MyService {
      * @return 查询列表
      */
     public List<Record> getTagInQuantityList(Kv cond) {
-        QueryCondition condition = QueryConditionBuilder.by(cond, false)
-                .put(SQL_PATTERN_BETWEEN, "dateRange", "rd.createDate")
-                .build();
+        QueryCondition condition = QueryConditionBuilder.by(cond, false).put(SQL_PATTERN_BETWEEN, "dateRange", "rd.createDate").build();
 
-        String select = "SELECT goods.supplierId, rd.createDate, rd.createUserId, COUNT(rd.spdCode) AS quantity"
-                + " FROM com_record_in rd LEFT JOIN base_goods goods ON rd.goodsId = goods.id "
-                + " WHERE rd.cabinetId in (SELECT id from base_cabinet where deptId='" + cond.getStr("deptId") + "')"
-                + condition.getSql()
-                + " GROUP BY goods.supplierId, rd.createDate";
+        String select = "SELECT goods.supplierId, rd.createDate, rd.createUserId, COUNT(rd.spdCode) AS quantity" + " FROM com_record_in rd LEFT JOIN base_goods goods ON rd.goodsId = goods.id " + " WHERE rd.cabinetId in (SELECT id from base_cabinet where deptId='" + cond.getStr("deptId") + "')" + condition.getSql() + " GROUP BY goods.supplierId, rd.createDate";
         return Db.find(select, condition.getParas());
     }
 
@@ -688,15 +563,9 @@ public class ComService extends MyService {
      * @return 查询列表
      */
     public List<Record> getTagInRecordList(Kv cond) {
-        QueryCondition condition = QueryConditionBuilder.by(cond, false)
-                .put(SQL_PATTERN_EQUAL, "type", "rd.type")
-                .put(SQL_PATTERN_BETWEEN, "dateRange", "rd.createDate")
-                .order(SQL_SORT_DESC, "rd.createDate")
-                .build();
+        QueryCondition condition = QueryConditionBuilder.by(cond, false).put(SQL_PATTERN_EQUAL, "type", "rd.type").put(SQL_PATTERN_BETWEEN, "dateRange", "rd.createDate").order(SQL_SORT_DESC, "rd.createDate").build();
 
-        String select = "SELECT rd.*,tag.batchNo,tag.expireDate FROM com_record_in rd LEFT JOIN com_tag tag ON rd.spdCode = tag.spdCode "
-                + " WHERE rd.cabinetId in (SELECT id from base_cabinet where deptId='" + cond.getStr("deptId") + "')"
-                + condition.getSql();
+        String select = "SELECT rd.*,tag.batchNo,tag.expireDate FROM com_record_in rd LEFT JOIN com_tag tag ON rd.spdCode = tag.spdCode " + " WHERE rd.cabinetId in (SELECT id from base_cabinet where deptId='" + cond.getStr("deptId") + "')" + condition.getSql();
         return Db.find(select, condition.getParas());
     }
 
@@ -723,12 +592,7 @@ public class ComService extends MyService {
             cond.set("userId", ids.stream().map(Cabinet::getId).collect(Collectors.joining(",")));
         }
 
-        QueryCondition condition = QueryConditionBuilder.by(cond, true)
-                .put(SQL_PATTERN_BETWEEN, "dateRange", "rd.createDate")
-                .put(SQL_PATTERN_IN, "cabinetId", "rd.cabinetId")
-                .put(SQL_PATTERN_IN, "userId", "rd.createUserId")
-                .order(SQL_SORT_DESC, "rd.createDate")
-                .build();
+        QueryCondition condition = QueryConditionBuilder.by(cond, true).put(SQL_PATTERN_BETWEEN, "dateRange", "rd.createDate").put(SQL_PATTERN_IN, "cabinetId", "rd.cabinetId").put(SQL_PATTERN_IN, "userId", "rd.createUserId").order(SQL_SORT_DESC, "rd.createDate").build();
 
         String select = "SELECT rd.*,tag.batchNo,tag.expireDate FROM com_record_out rd LEFT JOIN com_tag tag ON rd.spdCode = tag.spdCode " + condition.getSql();
         return Db.find(select, condition.getParas());
@@ -760,21 +624,17 @@ public class ComService extends MyService {
         Kv spdCodeKv = Kv.create();
 
         //过滤已归还记录，排除重复出库记录
-        List<Record> recordList = getTagOutRecordList(cond).stream().filter(record ->
-        {
+        List<Record> recordList = getTagOutRecordList(cond).stream().filter(record -> {
             String spdCode = record.getStr("spdCode");
 
             //SPD库存找不到该耗材，认为已消耗
-            if (spdFlag && !spdStockTagList.contains(spdCode))
-                return false;
+            if (spdFlag && !spdStockTagList.contains(spdCode)) return false;
 
             //本地库存找到该耗材，认为已归还
-            if (stockTagSpdCodeList.contains(spdCode))
-                return false;
+            if (stockTagSpdCodeList.contains(spdCode)) return false;
 
             //检测到重复出库记录，进行过滤
-            if (spdCodeKv.containsKey(spdCode))
-                return false;
+            if (spdCodeKv.containsKey(spdCode)) return false;
 
             spdCodeKv.set(spdCode, null);
 
@@ -859,15 +719,7 @@ public class ComService extends MyService {
                 //TODO 本地标签库未找到，去出库耗材数据库查找
                 Material material = cacheService.getMaterialById(spdCode);
                 if (material != null) {
-                    tag = new Tag()
-                            .setSpdCode(spdCode)
-                            .setDeptId(material.getDeptId())
-                            .setOrderCode(material.getOrderCode())
-                            .setGoodsId(material.getGoodsId())
-                            .setBatchNo(material.getBatchNo())
-                            .setExpireDate(material.getExpireDate())
-                            .setCreateDate(material.getCreateDate())
-                            .setAccept(TagNo);
+                    tag = new Tag().setSpdCode(spdCode).setDeptId(material.getDeptId()).setOrderCode(material.getOrderCode()).setGoodsId(material.getGoodsId()).setBatchNo(material.getBatchNo()).setExpireDate(material.getExpireDate()).setCreateDate(material.getCreateDate()).setAccept(TagNo);
                     tagList.add(tag);
                 }
             }
@@ -876,32 +728,23 @@ public class ComService extends MyService {
     }
 
     public List<Record> getSaveTagList(Kv cond) {
-        QueryCondition condition = QueryConditionBuilder.by(cond, true)
-                .put(SQL_PATTERN_EQUAL, "deptId", "deptId")
-                .put(SQL_PATTERN_BETWEEN, "dateRange", "createDate")
-                .build();
+        QueryCondition condition = QueryConditionBuilder.by(cond, true).put(SQL_PATTERN_EQUAL, "deptId", "deptId").put(SQL_PATTERN_BETWEEN, "dateRange", "createDate").build();
 
         String select = "SELECT * FROM com_tag " + condition.getSql();
         return Db.find(select, condition.getParas());
     }
 
     public Record getTagInventoryRecordDifferenceList(Kv cond) {
-        QueryCondition condition = QueryConditionBuilder.by(cond, true)
-                .put(SQL_PATTERN_EQUAL, "cabinetId", "cabinetId")
-                .order(SQL_SORT_DESC, "createDate")
-                .build();
+        QueryCondition condition = QueryConditionBuilder.by(cond, true).put(SQL_PATTERN_EQUAL, "cabinetId", "cabinetId").order(SQL_SORT_DESC, "createDate").build();
 
         String select = "SELECT * FROM com_record_inventory_difference" + condition.getSql();
         return Db.findFirst(select, condition.getParas());
     }
 
     public List<Record> getTagInventoryRecordDifferenceDetail(Kv cond) {
-        QueryCondition condition = QueryConditionBuilder.by(cond, true)
-                .put(SQL_PATTERN_EQUAL, "inventoryDifferenceId", "rd.inventoryDifferenceId")
-                .build();
+        QueryCondition condition = QueryConditionBuilder.by(cond, true).put(SQL_PATTERN_EQUAL, "inventoryDifferenceId", "rd.inventoryDifferenceId").build();
 
-        String select = "SELECT rd.*, tag.batchNo,tag.expireDate,tag.epc FROM com_record_inventory rd left join com_tag tag on rd.spdCode=tag.spdCode " + condition.getSql()
-                + "ORDER BY state";
+        String select = "SELECT rd.*, tag.batchNo,tag.expireDate,tag.epc FROM com_record_inventory rd left join com_tag tag on rd.spdCode=tag.spdCode " + condition.getSql() + "ORDER BY state";
         return Db.find(select, condition.getParas());
     }
 
@@ -949,17 +792,7 @@ public class ComService extends MyService {
 
                 materials.add(material);
 
-                Tag tag = new Tag()
-                        .setOrderCode(orderCode)
-                        .setSpdCode(material.getSpdCode())
-                        .setDeptId(deptId)
-                        .setGoodsId(goodsId)
-                        .setEpc(epc)
-                        .setBatchNo(batchNo)
-                        .setExpireDate(material.getExpireDate())
-                        .setCreateUserId(createUserId)
-                        .setCreateDate(createDate)
-                        .setAccept(TagNo);
+                Tag tag = new Tag().setOrderCode(orderCode).setSpdCode(material.getSpdCode()).setDeptId(deptId).setGoodsId(goodsId).setEpc(epc).setBatchNo(batchNo).setExpireDate(material.getExpireDate()).setCreateUserId(createUserId).setCreateDate(createDate).setAccept(TagNo);
 
                 tags.add(tag);
             }
@@ -1085,17 +918,7 @@ public class ComService extends MyService {
     /////////////////////////////////////////////////////////////////////
 
     public Page<Record> getTagPage(int pageNumber, int pageSize, Kv cond) {
-        QueryCondition condition = QueryConditionBuilder.by(cond, true)
-                .put(SQL_PATTERN_EQUAL, "accept")
-                .put(SQL_PATTERN_EQUAL, "goodsId")
-                .put(SQL_PATTERN_EQUAL, "deptId")
-                .put(SQL_PATTERN_LIKE, "spdCode")
-                .put(SQL_PATTERN_LIKE, "epc")
-                .put(SQL_PATTERN_EQUAL, "orderCode")
-                .put(SQL_PATTERN_BETWEEN, "dateRange", "createDate")
-                .order(SQL_SORT_DESC, "createDate")
-                .order(SysConstant.SQL_SORT_DESC, "epc")
-                .build();
+        QueryCondition condition = QueryConditionBuilder.by(cond, true).put(SQL_PATTERN_EQUAL, "accept").put(SQL_PATTERN_EQUAL, "goodsId").put(SQL_PATTERN_EQUAL, "deptId").put(SQL_PATTERN_LIKE, "spdCode").put(SQL_PATTERN_LIKE, "epc").put(SQL_PATTERN_EQUAL, "orderCode").put(SQL_PATTERN_BETWEEN, "dateRange", "createDate").order(SQL_SORT_DESC, "createDate").order(SysConstant.SQL_SORT_DESC, "epc").build();
 
         String select = "select * ";
         String sqlExceptSelect = " from com_tag ";
@@ -1111,11 +934,7 @@ public class ComService extends MyService {
             cond.set("cabinetId", ids.stream().map(Cabinet::getId).collect(Collectors.joining(",")));
         }
 
-        QueryCondition condition = QueryConditionBuilder.by(cond, true)
-                .put(SQL_PATTERN_EQUAL, "deptId")
-                .put(SQL_PATTERN_EQUAL, "goodsId")
-                .put(SQL_PATTERN_IN, "cabinetId")
-                .build();
+        QueryCondition condition = QueryConditionBuilder.by(cond, true).put(SQL_PATTERN_EQUAL, "deptId").put(SQL_PATTERN_EQUAL, "goodsId").put(SQL_PATTERN_IN, "cabinetId").build();
 
         String select = "SELECT deptId, cabinetId, goodsId, COUNT(*) totalQuantity, COUNT( CASE WHEN expireDate < '" + date + "' THEN 1 END ) expireQuantity";
         String sqlExceptSelect = "FROM com_stock_tag ";
@@ -1143,14 +962,7 @@ public class ComService extends MyService {
             cond.set("cabinetId", ids.stream().map(Cabinet::getId).collect(Collectors.joining(",")));
         }
 
-        QueryCondition condition = QueryConditionBuilder.by(cond, true)
-                .put(SQL_PATTERN_EQUAL, "deptId", "tag.deptId")
-                .put(SQL_PATTERN_EQUAL, "goodsId", "tag.goodsId")
-                .put(SQL_PATTERN_EQUAL, "state2", "(tag.expireDate<'" + date + "')")
-                .put(SQL_PATTERN_IN, "cabinetId", "tag.cabinetId")
-                .put(SQL_PATTERN_LIKE, "spdCode", "tag.spdCode")
-                .order(SQL_SORT_ASC, "tag.deptId,tag.goodsId,tag.spdCode")
-                .build();
+        QueryCondition condition = QueryConditionBuilder.by(cond, true).put(SQL_PATTERN_EQUAL, "deptId", "tag.deptId").put(SQL_PATTERN_EQUAL, "goodsId", "tag.goodsId").put(SQL_PATTERN_EQUAL, "state2", "(tag.expireDate<'" + date + "')").put(SQL_PATTERN_IN, "cabinetId", "tag.cabinetId").put(SQL_PATTERN_LIKE, "spdCode", "tag.spdCode").order(SQL_SORT_ASC, "tag.deptId,tag.goodsId,tag.spdCode").build();
 
         String select = "select tt.epc,tag.*,tag.expireDate<'" + DateUtils.getCurrentDate() + "' state1,tag.expireDate<'" + date + "' state2";
         String sqlExceptSelect = " from com_stock_tag tag left join com_tag tt on tag.spdCode=tt.spdCode";
@@ -1190,11 +1002,7 @@ public class ComService extends MyService {
         Predicate<Tag> spdCodeFilter = tag -> StringUtils.isEmpty(spdCode) || tag.getSpdCode().contains(spdCode);
         Predicate<Tag> expireDateFilter = tag -> !expire || DateUtils.compare(date, tag.getExpireDate());
 
-        List<Tag> recordList = spdStockTagList.stream().filter(goodsIdFilter)
-                .filter(spdCodeFilter)
-                .filter(expireDateFilter)
-                .sorted(Comparator.comparing(Tag::getGoodsId))
-                .collect(Collectors.toList());
+        List<Tag> recordList = spdStockTagList.stream().filter(goodsIdFilter).filter(spdCodeFilter).filter(expireDateFilter).sorted(Comparator.comparing(Tag::getGoodsId)).collect(Collectors.toList());
 
         Page<Tag> page = new Page<>();
         page.setPageNumber(pageNumber);
@@ -1225,8 +1033,7 @@ public class ComService extends MyService {
      */
     public Page<Record> getTagRecordQuantityPage(int pageNumber, int pageSize, Kv cond) {
         if (StringUtils.isNotEmpty(cond.getStr("deptId"))) {
-            List<String> cabinetIdList = baseService.getCabinetList(Kv.by("deptId", cond.getStr("deptId")))
-                    .stream().map(e -> e.getStr("id")).collect(Collectors.toList());
+            List<String> cabinetIdList = baseService.getCabinetList(Kv.by("deptId", cond.getStr("deptId"))).stream().map(e -> e.getStr("id")).collect(Collectors.toList());
             cond.set("cabinetIds", String.join(",", cabinetIdList));
 
             //科室下没有柜体，返回空集合
@@ -1238,12 +1045,7 @@ public class ComService extends MyService {
             }
         }
 
-        QueryCondition condition = QueryConditionBuilder.by(cond, true)
-                .put(SQL_PATTERN_BETWEEN, "dateRange", "rd.createDate")
-                .put(SQL_PATTERN_EQUAL, "type", "rd.type")
-                .put(SQL_PATTERN_IN, "cabinetIds", "rd.cabinetId")
-                .order(SQL_SORT_DESC, "rd.createDate")
-                .build();
+        QueryCondition condition = QueryConditionBuilder.by(cond, true).put(SQL_PATTERN_BETWEEN, "dateRange", "rd.createDate").put(SQL_PATTERN_EQUAL, "type", "rd.type").put(SQL_PATTERN_IN, "cabinetIds", "rd.cabinetId").order(SQL_SORT_DESC, "rd.createDate").build();
 
         String select = "SELECT rd.*";
         String sqlExceptSelect = "FROM com_record_inout_exception rd";
@@ -1262,8 +1064,7 @@ public class ComService extends MyService {
      */
     public Page<Record> getTagRecordPage(int pageNumber, int pageSize, Kv cond, String type) {
         if (StringUtils.isNotEmpty(cond.getStr("deptId"))) {
-            List<String> cabinetIdList = baseService.getCabinetList(Kv.by("deptId", cond.getStr("deptId")))
-                    .stream().map(e -> e.getStr("id")).collect(Collectors.toList());
+            List<String> cabinetIdList = baseService.getCabinetList(Kv.by("deptId", cond.getStr("deptId"))).stream().map(e -> e.getStr("id")).collect(Collectors.toList());
             cond.set("cabinetIds", String.join(",", cabinetIdList));
 
             //科室下没有柜体，返回空集合
@@ -1275,33 +1076,24 @@ public class ComService extends MyService {
             }
         }
 
-        QueryCondition condition = QueryConditionBuilder.by(cond, false)
-                .put(SQL_PATTERN_EQUAL, "goodsId", "tag.goodsId")
-                .put(SQL_PATTERN_BETWEEN, "dateRange", "rd.createDate")
-                .put(SQL_PATTERN_LIKE, "spdCode", "rd.spdCode")
-                .put(SQL_PATTERN_IN, "cabinetIds", "rd.cabinetId")
-                .order(SQL_SORT_DESC, "rd.createDate")
-                .build();
+        QueryCondition condition = QueryConditionBuilder.by(cond, false).put(SQL_PATTERN_EQUAL, "goodsId", "tag.goodsId").put(SQL_PATTERN_BETWEEN, "dateRange", "rd.createDate").put(SQL_PATTERN_LIKE, "spdCode", "rd.spdCode").put(SQL_PATTERN_IN, "cabinetIds", "rd.cabinetId").order(SQL_SORT_DESC, "rd.createDate").build();
 
         String select = null;
         String sqlExceptSelect = null;
         switch (type) {
             case "tagIn":
                 select = "SELECT rd.*,tag.batchNo,tag.expireDate,'tagIn' as recordType";
-                sqlExceptSelect = "FROM com_record_in rd LEFT JOIN com_tag tag ON rd.spdCode = tag.spdCode " +
-                        "WHERE rd.type='no'";
+                sqlExceptSelect = "FROM com_record_in rd LEFT JOIN com_tag tag ON rd.spdCode = tag.spdCode " + "WHERE rd.type='no'";
                 break;
 
             case "tagReturn":
                 select = "SELECT rd.*,tag.batchNo,tag.expireDate,'tagReturn' as recordType";
-                sqlExceptSelect = "FROM com_record_in rd LEFT JOIN com_tag tag ON rd.spdCode = tag.spdCode " +
-                        "WHERE rd.type='ac'";
+                sqlExceptSelect = "FROM com_record_in rd LEFT JOIN com_tag tag ON rd.spdCode = tag.spdCode " + "WHERE rd.type='ac'";
                 break;
 
             case "tagOut":
                 select = "SELECT rd.*,tag.batchNo,tag.expireDate,'tagOut' as recordType";
-                sqlExceptSelect = "FROM com_record_out rd LEFT JOIN com_tag tag ON rd.spdCode = tag.spdCode " +
-                        "WHERE 1=1 ";
+                sqlExceptSelect = "FROM com_record_out rd LEFT JOIN com_tag tag ON rd.spdCode = tag.spdCode " + "WHERE 1=1 ";
                 break;
 
         }
@@ -1324,14 +1116,12 @@ public class ComService extends MyService {
         switch (type) {
             case "in":
                 select = "SELECT rd.*,tag.batchNo,tag.expireDate,IF (rd.type='no','tagIn','tagReturn') as recordType";
-                sqlExceptSelect = "FROM com_record_in rd LEFT JOIN com_tag tag ON rd.spdCode = tag.spdCode " +
-                        "WHERE rd.exceptionDescId=? ";
+                sqlExceptSelect = "FROM com_record_in rd LEFT JOIN com_tag tag ON rd.spdCode = tag.spdCode " + "WHERE rd.exceptionDescId=? ";
                 break;
 
             case "out":
                 select = "SELECT rd.*,tag.batchNo,tag.expireDate,'tagOut' as recordType";
-                sqlExceptSelect = "FROM com_record_out rd LEFT JOIN com_tag tag ON rd.spdCode = tag.spdCode " +
-                        "WHERE rd.exceptionDescId=? ";
+                sqlExceptSelect = "FROM com_record_out rd LEFT JOIN com_tag tag ON rd.spdCode = tag.spdCode " + "WHERE rd.exceptionDescId=? ";
                 break;
 
         }
@@ -1424,9 +1214,7 @@ public class ComService extends MyService {
      */
     public R getStockTagList(String deptId) {
         Kv cond = Kv.by("deptId", deptId);
-        QueryCondition condition = QueryConditionBuilder.by(cond, true)
-                .put(SQL_PATTERN_EQUAL, "deptId", "stock.deptId")
-                .build();
+        QueryCondition condition = QueryConditionBuilder.by(cond, true).put(SQL_PATTERN_EQUAL, "deptId", "stock.deptId").build();
 
         String select = "SELECT tag.* FROM COM_STOCK_TAG stock left join COM_TAG tag on stock.spdCode = tag.spdCode";
         List<Record> tagList = Db.find(select + condition.getSql(), condition.getParas());
@@ -1442,11 +1230,7 @@ public class ComService extends MyService {
      * @return
      */
     public Page<Record> getTagInventoryRecordDifferencePage(int pageNumber, int pageSize, Kv cond) {
-        QueryCondition condition = QueryConditionBuilder.by(cond, false)
-                .put(SQL_PATTERN_EQUAL, "deptId", "deptId")
-                .put(SQL_PATTERN_BETWEEN, "dateRange", "createDate")
-                .order(SQL_SORT_DESC, "createDate")
-                .build();
+        QueryCondition condition = QueryConditionBuilder.by(cond, false).put(SQL_PATTERN_EQUAL, "deptId", "deptId").put(SQL_PATTERN_BETWEEN, "dateRange", "createDate").order(SQL_SORT_DESC, "createDate").build();
 
         String select = "SELECT * ";
         String sqlExceptSelect = "FROM com_record_inventory_difference where 1=1";
@@ -1499,21 +1283,17 @@ public class ComService extends MyService {
         Kv spdCodeKv = Kv.create();
 
         //过滤已归还记录，排除重复出库记录
-        List<Record> recordList = getTagOutRecordList(cond).stream().filter(record ->
-        {
+        List<Record> recordList = getTagOutRecordList(cond).stream().filter(record -> {
             String spdCode = record.getStr("spdCode");
 
             //SPD库存找不到该耗材，认为已消耗
-            if (spdFlag && !spdStockTagList.contains(spdCode))
-                return false;
+            if (spdFlag && !spdStockTagList.contains(spdCode)) return false;
 
             //本地库存找到该耗材，认为已归还
-            if (stockTagSpdCodeList.contains(spdCode))
-                return false;
+            if (stockTagSpdCodeList.contains(spdCode)) return false;
 
             //检测到重复出库记录，进行过滤
-            if (spdCodeKv.containsKey(spdCode))
-                return false;
+            if (spdCodeKv.containsKey(spdCode)) return false;
 
             spdCodeKv.set(spdCode, null);
 
@@ -1591,8 +1371,7 @@ public class ComService extends MyService {
 
         //查询SPD耗材同步记录
         Material material = cacheService.getMaterialById(spdCode);
-        if (material == null)
-            return R.error(ResultCode.DATA_NOT_EXISTED);
+        if (material == null) return R.error(ResultCode.DATA_NOT_EXISTED);
 
         List<Kv> kvs = new ArrayList<>();
         kvs.add(Kv.by("module", "SPD同步制标").set("createUserId", "").set("createDate", material.getCreateDate()));
@@ -1601,34 +1380,26 @@ public class ComService extends MyService {
         List<RecordIn> recordInList = RecordIn.dao.find("select * from com_record_in where spdCode= '" + spdCode + "'");
         recordInList.forEach(record -> {
             Cabinet cabinet = cacheService.getCabinetById(record.getCabinetId());
-            kvs.add(Kv.by("module", cabinet.getName() + (record.getType().equals(SysConstant.TagNo) ? "收货" : "入柜"))
-                    .set("createUserId", record.getCreateUserId())
-                    .set("createDate", record.getCreateDate()));
+            kvs.add(Kv.by("module", cabinet.getName() + (record.getType().equals(SysConstant.TagNo) ? "收货" : "入柜")).set("createUserId", record.getCreateUserId()).set("createDate", record.getCreateDate()));
         });
 
         //查询出柜记录
         List<RecordOut> recordOutList = RecordOut.dao.find("select * from com_record_out where spdCode= '" + spdCode + "'");
         recordOutList.forEach(record -> {
             Cabinet cabinet = cacheService.getCabinetById(record.getCabinetId());
-            kvs.add(Kv.by("module", cabinet.getName() + "出柜")
-                    .set("createUserId", record.getCreateUserId())
-                    .set("createDate", record.getCreateDate()));
+            kvs.add(Kv.by("module", cabinet.getName() + "出柜").set("createUserId", record.getCreateUserId()).set("createDate", record.getCreateDate()));
         });
 
         //查询标签绑定EPC记录
         List<LogOperate> logOperateList = LogOperate.dao.find("select * from sys_log_operate where module ='现有标签绑定EPC' and state='success' and parameter like '%" + spdCode + "%'");
         logOperateList.forEach(record -> {
-            kvs.add(Kv.by("module", "标签绑定EPC")
-                    .set("createUserId", record.getCreateUserId())
-                    .set("createDate", record.getCreateDate()));
+            kvs.add(Kv.by("module", "标签绑定EPC").set("createUserId", record.getCreateUserId()).set("createDate", record.getCreateDate()));
         });
 
         //查询标签解绑EPC记录
         Tag tag = cacheService.getTagById(spdCode);
         if (tag != null && StringUtils.isEmpty(tag.getEpc())) {
-            kvs.add(Kv.by("module", "标签解除EPC")
-                    .set("createUserId", tag.getCreateUserId())
-                    .set("createDate", tag.getCreateDate()));
+            kvs.add(Kv.by("module", "标签解除EPC").set("createUserId", tag.getCreateUserId()).set("createDate", tag.getCreateDate()));
         }
 
         //日志按时间倒序
@@ -1643,9 +1414,7 @@ public class ComService extends MyService {
      * @return
      */
     public R removeStockTag(String spdCode) {
-        QueryCondition condition = QueryConditionBuilder.by(Kv.by("spdCode", spdCode), true)
-                .put(SysConstant.SQL_PATTERN_IN, "spdCode", "stock.spdCode")
-                .build();
+        QueryCondition condition = QueryConditionBuilder.by(Kv.by("spdCode", spdCode), true).put(SysConstant.SQL_PATTERN_IN, "spdCode", "stock.spdCode").build();
 
         String select = "select stock.*,tag.epc from com_stock_tag stock left join com_tag tag on stock.spdCode=tag.spdCode ";
         List<Record> stockTagList = Db.find(select + condition.getSql(), condition.getParas());
@@ -1681,5 +1450,11 @@ public class ComService extends MyService {
         });
 
         return R.ok();
+    }
+
+    public Page<Record> getTagInventoryNoStock(int pageNumber, int pageSize) {
+        String select = "select * ";
+        String sqlExceptSelect = "from (select createDate,count(createDate) num from com_record_inventory_new GROUP BY createDate order by createDate desc ) a";
+        return Db.paginate(pageNumber, pageSize, select, sqlExceptSelect);
     }
 }

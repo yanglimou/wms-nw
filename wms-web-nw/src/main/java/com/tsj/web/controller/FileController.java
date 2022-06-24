@@ -300,9 +300,10 @@ public class FileController extends MyController {
     }
 
     @Before(GET.class)
+    @NotNull({"createDate"})
     @OperateLog("导出盘点记录")
-    public void downloadRecordInventoryNewList() throws Exception {
-        File file = fileService.getRecordInventoryNewFile();
+    public void downloadRecordInventoryNewList(String createDate) throws Exception {
+        File file = fileService.getRecordInventoryNewFile(createDate);
         if (!file.exists()) {
             logger.error("导出库存记录失败");
             renderJson(R.error(ResultCode.FILE_CREATE_FAIL));
