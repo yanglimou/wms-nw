@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -662,7 +663,7 @@ public class FileService extends MyService {
                 "LEFT JOIN base_cabinet d ON a.cabinetId = d.id\n" +
                 "LEFT JOIN base_goods e ON b.goodsId = e.id\n" +
                 "LEFT JOIN base_manufacturer f ON e.manufacturerId = f.id\n" +
-                "where a.createDate='"+createDate+"' and b.epc is not null order by b.goodsId";
+                "where a.createDate='" + createDate + "' and b.epc is not null order by b.goodsId";
         List<Record> recordList = Db.find(select);
 
         List<String[]> list = new ArrayList<>();
@@ -743,6 +744,38 @@ public class FileService extends MyService {
 
         int count = countList.stream().mapToInt(item -> item).sum();
         String filePath = ExcelKit.putObjectListToExcel(FileConstant.TEMPLATE_PATH + SysConstant.TEMPLATE_TAG_STOCK_RECORD, 2, 10, list, count);
+        return new File(filePath);
+    }
+
+    public File downloadInventory(String inventoryDifferenceId) throws Exception {
+        String sql = "SELECT goodsId, count(state) total, sum(state = 'normal') normal, sum(state = 'more') more, sum(state = 'less') less, b.NAME goodsName, b.spec, b.unit, c.NAME manufacturerName FROM com_record_inventory a LEFT JOIN base_goods b ON a.goodsId = b.id LEFT JOIN base_manufacturer c ON b.manufacturerId = c.id WHERE inventoryDifferenceId = ? GROUP BY goodsId";
+        List<Record> recordList = Db.find(sql, inventoryDifferenceId);
+        List<String[]> list = new ArrayList<>();
+        AtomicInteger sum = new AtomicInteger();
+        recordList.forEach(record -> {
+            int total = record.getInt("total");
+            int normal = record.getInt("normal");
+            int more = record.getInt("more");
+            int less = record.getInt("less");
+            String goodsName = record.getStr("goodsName");
+            String spec = record.getStr("spec");
+            String unit = record.getStr("unit");
+            String manufacturerName = record.getStr("manufacturerName");
+
+            String[] array = new String[8];
+            int cells = 0;
+            array[cells++] = goodsName;
+            array[cells++] = spec;
+            array[cells++] = unit;
+            array[cells++] = manufacturerName;
+            array[cells++] = total + "";
+            array[cells++] = normal + "";
+            array[cells++] = more + "";
+            array[cells++] = less + "";
+            list.add(array);
+            sum.addAndGet(total);
+        });
+        String filePath = ExcelKit.putObjectListToExcel(FileConstant.TEMPLATE_PATH + SysConstant.TEMPLATE_INVENTORY, 2, 8, list, sum.get());
         return new File(filePath);
     }
 }

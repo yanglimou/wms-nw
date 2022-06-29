@@ -15,6 +15,7 @@ import com.tsj.common.constant.SysConstant;
 import com.tsj.common.utils.*;
 import com.tsj.domain.model.*;
 import com.tsj.service.common.MyService;
+import com.tsj.service.spdStockTag.SpdStockTagContainer;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
@@ -1456,5 +1457,24 @@ public class ComService extends MyService {
         String select = "select * ";
         String sqlExceptSelect = "from (select createDate,count(createDate) num from com_record_inventory_new GROUP BY createDate order by createDate desc ) a";
         return Db.paginate(pageNumber, pageSize, select, sqlExceptSelect);
+    }
+
+    public Map queryNoStock(String epc) {
+        String[] epcArray = epc.split(",");
+        // 非注册标签过滤
+        List<Tag> filterComTagList = filterTag(epcArray, StockNone, null);
+        Set<String> spdStockSet = SpdStockTagContainer.getAll();
+        // spd库存过滤
+        List<Tag> filterSpdList = filterComTagList.stream().filter(tag -> spdStockSet.contains(tag.getSpdCode())).collect(Collectors.toList());
+        // goodsId分组
+        Map<String, List<Tag>> collect = filterSpdList.stream().collect(Collectors.groupingBy(Tag::getGoodsId));
+        // 组装结果
+        List<Map> data = new ArrayList<>();
+        collect.forEach((goodsId, tagList) -> {
+            Goods goods = cacheService.getGoodsById(goodsId);
+            Kv row = Kv.by("goodsName", goods.getName()).set("spec", goods.getSpec()).set("num", tagList.size());
+            data.add(row);
+        });
+        return Kv.by("readNum", epcArray.length).set("tagFilterNum", filterComTagList.size()).set("spdFilterNum", filterSpdList.size()).set("data", data);
     }
 }

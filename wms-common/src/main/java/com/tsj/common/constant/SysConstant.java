@@ -100,6 +100,7 @@ public abstract class SysConstant {
     public static final String TEMPLATE_TAG_INOUT = "tempTagInOutList.xls";
     public static final String TEMPLATE_TAG_INOUT_RECORD = "tempTagInOutRecordList.xls";
     public static final String TEMPLATE_TAG_STOCK = "tempTagStockList.xls";
+    public static final String TEMPLATE_INVENTORY = "tempInventory.xls";
     public static final String TEMPLATE_RECORD_INVENTORY_NEW = "tempRecordInventoryNewList.xls";
     public static final String TEMPLATE_TAG_STOCK_RECORD = "tempTagStockRecordList.xls";
 

@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class SpdStockTagContainer {
 
     public static final Log logger = Log.getLog(SpdStockTagContainer.class);
-    private static ConcurrentHashMap<String, Set<String>> concurrentHashMap = new ConcurrentHashMap<>();
+    private static volatile ConcurrentHashMap<String, Set<String>> concurrentHashMap = new ConcurrentHashMap<>();
     /**
      * SPD数据同步标识，防止重复操作
      */
@@ -48,6 +48,10 @@ public class SpdStockTagContainer {
         }
         isRunning = false;
         return;
+    }
+
+    public static ConcurrentHashMap<String, Set<String>> getConcurrentHashMap() {
+        return concurrentHashMap;
     }
 
     public static Set<String> getByDept(String deptId) {

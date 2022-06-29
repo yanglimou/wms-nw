@@ -24,14 +24,12 @@ import com.tsj.service.CacheService;
 import com.tsj.service.ComService;
 import com.tsj.service.SpdService;
 import com.tsj.service.interceptor.AuthInterceptor;
-import com.tsj.service.spdStockTag.SpdStockTagContainer;
 import com.tsj.web.common.MyController;
 import com.tsj.web.hikvision.HikVision;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 /**
  * @className: ApiComController
@@ -274,14 +272,21 @@ public class ApiComController extends MyController {
     @OperateLog("查询标签，根据EPC")
     public void getTag(String epc) {
         String[] epcArray = epc.split(",");
-        Set<String> spdSet = SpdStockTagContainer.getAll();
         List<Tag> tagList = null;
         if (epcArray[0].length() == 24) {
-            tagList = comService.getTagListByEpc(epcArray).stream().filter(tag -> spdSet.contains(tag.getSpdCode())).collect(Collectors.toList());
+            tagList = comService.getTagListByEpc(epcArray);
         } else {
-            tagList = comService.getTagListByEpcFuzzy(epcArray).stream().filter(tag -> spdSet.contains(tag.getSpdCode())).collect(Collectors.toList());
+            tagList = comService.getTagListByEpcFuzzy(epcArray);
         }
         renderJson(R.ok().putData(tagList));
+    }
+
+    @Before(GET.class)
+    @NotNull("epc")
+    @OperateLog("无库存盘点查询")
+    public void queryNoStock(String epc) {
+        Map map = comService.queryNoStock(epc);
+        renderJson(R.ok().putData(map));
     }
 
     @Before(GET.class)

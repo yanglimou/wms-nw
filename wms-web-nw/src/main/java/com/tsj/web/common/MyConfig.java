@@ -26,10 +26,12 @@ import com.tsj.service.CacheService;
 import com.tsj.service.interceptor.AuthInterceptor;
 import com.tsj.service.interceptor.EmptyInterceptor;
 import com.tsj.service.interceptor.OperateLogInterceptor;
+import com.tsj.service.spdStockTag.SpdStockTagContainer;
 import com.tsj.web.controller.*;
 import com.tsj.web.controller.api.ApiBaseController;
 import com.tsj.web.controller.api.ApiComController;
 import com.tsj.web.controller.api.ApiSysController;
+import com.tsj.web.controller.api.DevelopmentToolsController;
 import net.dreamlu.event.EventPlugin;
 import org.apache.commons.lang3.StringUtils;
 
@@ -93,6 +95,7 @@ public class MyConfig extends JFinalConfig {
 
         me.add("/api/sys", ApiSysController.class);
         me.add("/api/com", ApiComController.class);
+        me.add("/api/developmentTools", DevelopmentToolsController.class);
         me.add("/api/base", ApiBaseController.class);
     }
 
@@ -180,6 +183,9 @@ public class MyConfig extends JFinalConfig {
 
         //初始化本地缓存
         cacheService.initCache();
+
+        //同步spd库存
+        SpdStockTagContainer.syncSpd();
 
         //连接海康摄像头
 //        Enumeration<?> enu = CommonConfig.prop.getProperties().keys();

@@ -17,6 +17,7 @@ import com.tsj.common.utils.R;
 import com.tsj.domain.model.*;
 import com.tsj.service.common.MyService;
 import com.tsj.service.spdStockTag.SpdStockTagContainer;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -91,16 +92,14 @@ public class SpdService extends MyService {
                     String userId = record.getStr("createUserId");
                     String time = record.getStr("createDate");
 
-                    List<RecordIn> list = RecordIn.dao.find("select * from com_record_in where upload=? and type=?", UploadFailed, TagNo);
-                    if (list != null && list.size() > 0) {
-                        List<String> spdCodeArray = new ArrayList<>();
-                        list.forEach(in -> spdCodeArray.add(in.getSpdCode()));
-
+                    List<RecordIn> recordInList = RecordIn.dao.find("select * from com_record_in where upload=? and type=? and cabinetId=? and createDate=? ", UploadFailed, TagNo, cabinetId, time);
+                    List<String> spdCodeList = recordInList.stream().map(RecordIn::getSpdCode).collect(Collectors.toList());
+                    if (CollectionUtils.isNotEmpty(spdCodeList)) {
                         R result = HttpKit.postSpdTag(SPD_BASE_URL + SpdUrl.URL_IN_OUT.getUrl(), deptId, cabinetId,
-                                cacheService.getCabinetById(cabinetId).getName(), spdCodeArray, userId, time, "tagIn");
+                                cacheService.getCabinetById(cabinetId).getName(), spdCodeList, userId, time, "tagIn");
                         if (result.isSuccess()) {
-                            list.forEach(recordIn -> recordIn.setUpload(UploadSuccess));
-                            Db.batchUpdate(list, batchSize);
+                            recordInList.forEach(recordIn -> recordIn.setUpload(UploadSuccess));
+                            Db.batchUpdate(recordInList, batchSize);
                         }
                     }
                 });
@@ -117,16 +116,14 @@ public class SpdService extends MyService {
                     String userId = record.getStr("createUserId");
                     String time = record.getStr("createDate");
 
-                    List<RecordIn> list = RecordIn.dao.find("select * from com_record_in where upload=? and type=?", UploadFailed, TagAc);
-                    if (list != null && list.size() > 0) {
-                        List<String> spdCodeArray = new ArrayList<>();
-                        list.forEach(in -> spdCodeArray.add(in.getSpdCode()));
-
+                    List<RecordIn> recordInList = RecordIn.dao.find("select * from com_record_in where upload=? and type=?  and cabinetId=? and createDate=? ", UploadFailed, TagAc, cabinetId, time);
+                    List<String> spdCodeList = recordInList.stream().map(RecordIn::getSpdCode).collect(Collectors.toList());
+                    if (CollectionUtils.isNotEmpty(spdCodeList)) {
                         R result = HttpKit.postSpdTag(SPD_BASE_URL + SpdUrl.URL_IN_OUT.getUrl(), deptId, cabinetId,
-                                cacheService.getCabinetById(cabinetId).getName(), spdCodeArray, userId, time, "tagReturn");
+                                cacheService.getCabinetById(cabinetId).getName(), spdCodeList, userId, time, "tagReturn");
                         if (result.isSuccess()) {
-                            list.forEach(recordIn -> recordIn.setUpload(UploadSuccess));
-                            Db.batchUpdate(list, batchSize);
+                            recordInList.forEach(recordIn -> recordIn.setUpload(UploadSuccess));
+                            Db.batchUpdate(recordInList, batchSize);
                         }
                     }
                 });
@@ -143,16 +140,14 @@ public class SpdService extends MyService {
                     String userId = record.getStr("createUserId");
                     String time = record.getStr("createDate");
 
-                    List<RecordOut> list = RecordOut.dao.find("select * from com_record_out where upload=?", UploadFailed);
-                    if (list != null && list.size() > 0) {
-                        List<String> spdCodeArray = new ArrayList<>();
-                        list.forEach(in -> spdCodeArray.add(in.getSpdCode()));
-
+                    List<RecordOut> recordOutList = RecordOut.dao.find("select * from com_record_out where upload=?  and cabinetId=? and createDate=? ", UploadFailed, cabinetId, time);
+                    List<String> spdCodeList = recordOutList.stream().map(RecordOut::getSpdCode).collect(Collectors.toList());
+                    if (CollectionUtils.isNotEmpty(spdCodeList)) {
                         R result = HttpKit.postSpdTag(SPD_BASE_URL + SpdUrl.URL_IN_OUT.getUrl(), deptId, cabinetId,
-                                cacheService.getCabinetById(cabinetId).getName(), spdCodeArray, userId, time, "tagOut");
+                                cacheService.getCabinetById(cabinetId).getName(), spdCodeList, userId, time, "tagOut");
                         if (result.isSuccess()) {
-                            list.forEach(recordIn -> recordIn.setUpload(UploadSuccess));
-                            Db.batchUpdate(list, batchSize);
+                            recordOutList.forEach(recordIn -> recordIn.setUpload(UploadSuccess));
+                            Db.batchUpdate(recordOutList, batchSize);
                         }
                     }
                 });
@@ -162,7 +157,7 @@ public class SpdService extends MyService {
         //补发盘点
         if (isTagInventory) {
             synchronized (this) {
-                List<Record> recordList = Db.find("select cabinetId,createDate,createUserId as quantity from com_record_inventory where upload=? group by cabinetId,createDate", UploadFailed);
+                List<Record> recordList = Db.find("select cabinetId,createDate,createUserId as quantity from com_record_inventory where upload=? and ( state = ? or state = ? ) group by cabinetId,createDate", UploadFailed, InventoryNormal, InventoryMore);
                 recordList.forEach(record -> {
                     String cabinetId = record.getStr("cabinetId");
                     String deptId = cacheService.getCabinetById(cabinetId).getDeptId();
@@ -171,16 +166,14 @@ public class SpdService extends MyService {
                     String inventoryNo = RecordInventoryDifference.dao.findFirst("select * from com_record_inventory_difference where cabinetId=? and createDate=?",
                             record.getStr("cabinetId"), record.getStr("createDate")).getId();
 
-                    List<RecordInventory> list = RecordInventory.dao.find("select * from com_record_inventory where upload = ? and ( state = ? or state = ? )", UploadFailed, InventoryNormal, InventoryMore);
-                    if (list != null && list.size() > 0) {
-                        List<String> spdCodeArray = new ArrayList<>();
-                        list.forEach(in -> spdCodeArray.add(in.getSpdCode()));
-
+                    List<RecordInventory> recordInventoryList = RecordInventory.dao.find("select * from com_record_inventory where upload = ? and ( state = ? or state = ? )  and cabinetId=? and createDate=? ", UploadFailed, InventoryNormal, InventoryMore, cabinetId, time);
+                    List<String> spdCodeList = recordInventoryList.stream().map(RecordInventory::getSpdCode).collect(Collectors.toList());
+                    if (CollectionUtils.isNotEmpty(spdCodeList)) {
                         R result = HttpKit.postSpdTagInventory(SPD_BASE_URL + SpdUrl.URL_Inventory.getUrl(), deptId, cabinetId,
-                                cacheService.getCabinetById(cabinetId).getName(), spdCodeArray, userId, time, inventoryNo, "tagInventory");
+                                cacheService.getCabinetById(cabinetId).getName(), spdCodeList, userId, time, inventoryNo, "tagInventory");
                         if (result.isSuccess()) {
-                            list.forEach(recordIn -> recordIn.setUpload(UploadSuccess));
-                            Db.batchUpdate(list, batchSize);
+                            recordInventoryList.forEach(recordIn -> recordIn.setUpload(UploadSuccess));
+                            Db.batchUpdate(recordInventoryList, batchSize);
                         }
                     }
                 });
@@ -467,7 +460,7 @@ public class SpdService extends MyService {
                             .setExpireDate(record.getStr("EXPIRE_DATE").replace("T", " "))
                             .setCreateDate(record.getStr("CREATEDATE"));
                     saveList.add(material);
-                } else if (record.getStr("CREATEDATE").compareTo(material.getCreateDate())>0) {
+                } else if (record.getStr("CREATEDATE").compareTo(material.getCreateDate()) > 0) {
                     material.setDeptId(record.getStr("DEPOT_ID"))
                             .setOrderCode(record.getStr("ORDER_CODE"))
                             .setGoodsId(record.getStr("COM_GOODS_ID"))

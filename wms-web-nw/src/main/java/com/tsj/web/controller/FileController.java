@@ -13,16 +13,14 @@ import com.tsj.common.annotation.OperateLog;
 import com.tsj.common.constant.FileConstant;
 import com.tsj.common.constant.ResultCode;
 import com.tsj.common.constant.SysConstant;
-import com.tsj.common.utils.DateUtils;
 import com.tsj.common.utils.ExcelKit;
-import com.tsj.common.utils.IDGenerator;
 import com.tsj.common.utils.R;
 import com.tsj.service.BaseService;
 import com.tsj.service.CacheService;
 import com.tsj.service.ComService;
 import com.tsj.service.FileService;
-import org.apache.commons.lang3.StringUtils;
 import com.tsj.web.common.MyController;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -300,8 +298,21 @@ public class FileController extends MyController {
     }
 
     @Before(GET.class)
-    @NotNull({"createDate"})
+    @NotNull({"inventoryDifferenceId"})
     @OperateLog("导出盘点记录")
+    public void downloadInventory(String inventoryDifferenceId) throws Exception {
+        File file = fileService.downloadInventory(inventoryDifferenceId);
+        if (!file.exists()) {
+            logger.error("导出库存记录失败");
+            renderJson(R.error(ResultCode.FILE_CREATE_FAIL));
+        } else {
+            renderFile(file);
+        }
+    }
+
+    @Before(GET.class)
+    @NotNull({"createDate"})
+    @OperateLog("导出无库存盘点记录")
     public void downloadRecordInventoryNewList(String createDate) throws Exception {
         File file = fileService.getRecordInventoryNewFile(createDate);
         if (!file.exists()) {

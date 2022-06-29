@@ -40,6 +40,7 @@
 
     <script type="text/html" id="recordInListBar">
         <a class="layui-btn layui-btn-xs" lay-event="detail"><i class="layui-icon">&#xe642;</i>耗材明细</a>
+        <a class="layui-btn layui-btn-xs" lay-event="exportDetail"><i class="layui-icon">&#xe601;</i>导出明细</a>
     </script>
 
     <script type="text/javascript" src="../../layui/layui.js"></script>
@@ -121,7 +122,7 @@
                             return renderItemName(userList, d.createUserId);
                         }
                     }
-                    , { title: '操作', templet: '#recordInListBar', width: 120, fixed: "right", align: "center" }
+                    , { title: '操作', templet: '#recordInListBar', width: 240, fixed: "right", align: "center" }
                 ]]
             });
 
@@ -151,6 +152,9 @@
                 switch (obj.event) {
                     case 'detail':
                         openDialogByArea(data, '查询盘点明细', 'tagInventoryQuantityDetail.html', '1000px', '640px');
+                        break;
+                    case 'exportDetail':
+                        location.href = contextPath + "/file/downloadInventory" + getAccessTokenUrl()+"&inventoryDifferenceId="+data.id;
                         break;
 
                 }
