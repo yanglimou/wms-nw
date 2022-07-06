@@ -926,20 +926,27 @@ public class ComService extends MyService {
         return Db.paginate(pageNumber, pageSize, select, sqlExceptSelect + condition.getSql(), condition.getParas());
     }
 
-    public Page<Record> getStockTagQuantityPage(int pageNumber, int pageSize, Kv cond) {
+    public R getStockTagQuantityPage(int pageNumber, int pageSize, Kv cond) {
         String expireBeforeMonth = sysService.getConfig("cabinet", "expireBeforeMonth").getValue();
         String date = DateUtils.addMonth(DateUtils.getCurrentDate(), Integer.parseInt(expireBeforeMonth));
 
-        if (StringUtils.isNotEmpty(cond.getStr("cabinetName"))) {
-            List<Cabinet> ids = Cabinet.dao.find("select id from base_cabinet where name like concat('%', ?, '%') ", cond.getStr("cabinetName"));
-            cond.set("cabinetId", ids.stream().map(Cabinet::getId).collect(Collectors.joining(",")));
-        }
+//        String sql="";
 
-        QueryCondition condition = QueryConditionBuilder.by(cond, true).put(SQL_PATTERN_EQUAL, "deptId").put(SQL_PATTERN_EQUAL, "goodsId").put(SQL_PATTERN_IN, "cabinetId").build();
 
-        String select = "SELECT deptId, cabinetId, goodsId, COUNT(*) totalQuantity, COUNT( CASE WHEN expireDate < '" + date + "' THEN 1 END ) expireQuantity";
-        String sqlExceptSelect = "FROM com_stock_tag ";
-        return Db.paginate(pageNumber, pageSize, select, sqlExceptSelect + condition.getSql() + " GROUP BY cabinetId, goodsId ", condition.getParas());
+//        if (StringUtils.isNotEmpty(cond.getStr("cabinetName"))) {
+//            List<Cabinet> ids = Cabinet.dao.find("select id from base_cabinet where name like concat('%', ?, '%') ", cond.getStr("cabinetName"));
+//            cond.set("cabinetId", ids.stream().map(Cabinet::getId).collect(Collectors.joining(",")));
+//        }
+
+        QueryCondition condition = QueryConditionBuilder.by(cond, true).put(SQL_PATTERN_EQUAL, "a.deptId").put(SQL_PATTERN_LIKE, "c.name").put(SQL_PATTERN_LIKE, "b.name").build();
+
+        String select = "SELECT a.deptId, a.cabinetId, a.goodsId, COUNT(*) totalQuantity, COUNT( CASE WHEN a.expireDate < '" + date + "' THEN 1 END ) expireQuantity";
+        String sqlExceptSelect = "FROM com_stock_tag a LEFT JOIN base_cabinet b on a.cabinetId=b.id LEFT JOIN base_goods c on a.goodsId=c.id";
+        Page<Record> paginate = Db.paginate(pageNumber, pageSize, select, sqlExceptSelect + condition.getSql() + " GROUP BY a.cabinetId, a.goodsId ", condition.getParas());
+        Record record = Db.findFirst("SELECT COUNT(*) totalQuantity, COUNT( CASE WHEN a.expireDate < '2023-01-05' THEN 1 END ) expireQuantity " + sqlExceptSelect + condition.getSql(), condition.getParas());
+        Integer totalQuantity = record.getInt("totalQuantity");
+        Integer expireQuantity = record.getInt("expireQuantity");
+        return R.ok().putData(paginate.getList()).put("count", paginate.getTotalRow()).put("totalQuantity", totalQuantity).put("expireQuantity", expireQuantity);
     }
 
     /**

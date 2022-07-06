@@ -58,11 +58,9 @@ public class ComController extends MyController {
     @Before(GET.class)
     @NotNull({"page", "limit"})
     @OperateLog("查询库存数量分页")
-    public void getTagStockQuantityList(String deptId, String goodsId, String cabinetName, int page, int limit) {
-        Kv cond = Kv.by("deptId", deptId).set("goodsId", goodsId).set("cabinetName", cabinetName);
-
-        Page<Record> pageData = comService.getStockTagQuantityPage(page, limit, cond);
-        renderJson(R.ok().putData(pageData.getList()).put("count", pageData.getTotalRow()));
+    public void getTagStockQuantityList(String deptId, String goodsName, String cabinetName, int page, int limit) {
+        Kv cond = Kv.by("a.deptId", deptId).set("c.name", goodsName).set("b.name", cabinetName);
+        renderJson(comService.getStockTagQuantityPage(page, limit, cond));
     }
 
     @Before(GET.class)

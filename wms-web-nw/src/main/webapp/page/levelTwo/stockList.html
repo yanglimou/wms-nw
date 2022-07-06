@@ -23,8 +23,9 @@
             </div>
 
             <div class="layui-input-inline">
-                <select class="goodsId" lay-search>
-                </select>
+<!--                <select class="goodsId" lay-search>-->
+<!--                </select>-->
+                <input type="text" class="layui-input" id="goodsName" placeholder="耗材名称">
             </div>
 
             <div class="layui-input-inline">
@@ -62,7 +63,7 @@
             var manufacturerList = getSessionStorage("manufacturerList");
 
             $(".deptId").append(renderSelectOptions(deptList, { valueField: "id", textField: "name", selectedValue: null }, "科室"));
-            $(".goodsId").append(renderSelectOptions(goodsList, { valueField: "id", textField: "name", selectedValue: null, captionField: "spec" }, "耗材"));
+<!--            $(".goodsId").append(renderSelectOptions(goodsList, { valueField: "id", textField: "name", selectedValue: null, captionField: "spec" }, "耗材"));-->
             //医护人员只能查询本科室
             var employee = getCurrentEmployee();
             var deptId = employee.deptId;
@@ -84,6 +85,7 @@
                 , even: true
                 , method: 'GET'   //laui 修改请求方式
                 , cellMinWidth: 95
+                ,totalRow:true
                 , cols: [[ //表头
                     { type: 'numbers', title: '序号' }
                     , {
@@ -117,10 +119,17 @@
                             return renderItem(manufacturerList, manufacturerId, 'name');
                         }
                     }
-                    , { field: 'totalQuantity', title: '总库存', align: "center" }
-                    , { field: 'expireQuantity', title: '近效期库存', align: "center" }
+                    , { field: 'totalQuantity', title: '总库存', align: "center"}
+                    , { field: 'expireQuantity', title: '近效期库存', align: "center"}
                     , { title: '操作', templet: '#stockListBar', width: 150, fixed: "right", align: "center" }
                 ]]
+                ,done: function(res, curr, count){
+                    //如果是异步请求数据方式，res即为你接口返回的信息。
+                    //如果是直接赋值的方式，res即为：{data: [], count: 99} data为当前页数据、count为数据总长度
+                    console.log(res);
+                    $('.layui-table-total table td:eq(-3) div').html(res.totalQuantity);
+                    $('.layui-table-total table td:eq(-2) div').html(res.expireQuantity);
+                }
             });
 
             //搜索
@@ -133,7 +142,7 @@
                     }
                     , where: {
                         deptId: $('.deptId').val(),
-                        goodsId: $('.goodsId').val(),
+                        goodsName: $('#goodsName').val(),
                         cabinetName: $('#cabinetName').val(),
                     }
                 });
@@ -144,7 +153,7 @@
                 if ($(".deptId").val()) {
                     location.href = contextPath + "/file/downloadStockTagList" + getAccessTokenUrl()
                         + "&deptId=" + $(".deptId").val()
-                        + "&goodsId=" + $(".goodsId").val()
+                        + "&goodsName=" + $("#goodsName").val()
                         + "&cabinetName=" + $('#cabinetName').val();
 
                 } else {

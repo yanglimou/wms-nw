@@ -285,9 +285,8 @@ public class FileController extends MyController {
     @Before(GET.class)
     @NotNull({"deptId"})
     @OperateLog("导出库存记录")
-    public void downloadStockTagList(String deptId, String goodsId, String cabinetName) throws Exception {
-        Kv cond = Kv.by("deptId", deptId).set("goodsId", goodsId).set("cabinetName", cabinetName);
-
+    public void downloadStockTagList(String deptId, String goodsName, String cabinetName) throws Exception {
+        Kv cond = Kv.by("a.deptId", deptId).set("c.name", goodsName).set("b.name", cabinetName);
         File file = fileService.getTagStockToFile(cond);
         if (!file.exists()) {
             logger.error("导出库存记录失败，高值柜ID为:%s", deptId);

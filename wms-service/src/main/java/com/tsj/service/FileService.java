@@ -598,19 +598,19 @@ public class FileService extends MyService {
         String expireBeforeMonth = sysService.getConfig("cabinet", "expireBeforeMonth").getValue();
         String date = DateUtils.addMonth(DateUtils.getCurrentDate(), Integer.parseInt(expireBeforeMonth));
 
-        if (StringUtils.isNotEmpty(cond.getStr("cabinetName"))) {
-            List<Cabinet> ids = Cabinet.dao.find("select id from base_cabinet where name like concat('%', ?, '%') ", cond.getStr("cabinetName"));
-            cond.set("cabinetId", ids.stream().map(Cabinet::getId).collect(Collectors.joining(",")));
-        }
+//        if (StringUtils.isNotEmpty(cond.getStr("cabinetName"))) {
+//            List<Cabinet> ids = Cabinet.dao.find("select id from base_cabinet where name like concat('%', ?, '%') ", cond.getStr("cabinetName"));
+//            cond.set("cabinetId", ids.stream().map(Cabinet::getId).collect(Collectors.joining(",")));
+//        }
 
-        QueryCondition condition = QueryConditionBuilder.by(cond, true)
-                .put(SQL_PATTERN_EQUAL, "deptId")
-                .put(SQL_PATTERN_EQUAL, "goodsId")
-                .put(SQL_PATTERN_IN, "cabinetId")
-                .build();
-
-        String select = "SELECT deptId, cabinetId, goodsId, COUNT(*) totalQuantity, COUNT( CASE WHEN expireDate < '" + date + "' THEN 1 END ) expireQuantity FROM com_stock_tag ";
-        List<Record> recordList = Db.find(select + condition.getSql() + " GROUP BY cabinetId, goodsId ", condition.getParas());
+//        QueryCondition condition = QueryConditionBuilder.by(cond, true)
+//                .put(SQL_PATTERN_EQUAL, "deptId")
+//                .put(SQL_PATTERN_EQUAL, "goodsId")
+//                .put(SQL_PATTERN_IN, "cabinetId")
+//                .build();
+        QueryCondition condition = QueryConditionBuilder.by(cond, true).put(SQL_PATTERN_EQUAL, "a.deptId").put(SQL_PATTERN_LIKE, "c.name").put(SQL_PATTERN_LIKE, "b.name").build();
+        String select = "SELECT a.deptId, a.cabinetId, a.goodsId, COUNT(*) totalQuantity, COUNT( CASE WHEN a.expireDate < '" + date + "' THEN 1 END ) expireQuantity FROM com_stock_tag a LEFT JOIN base_cabinet b on a.cabinetId=b.id LEFT JOIN base_goods c on a.goodsId=c.id";
+        List<Record> recordList = Db.find(select + condition.getSql() + " GROUP BY a.cabinetId, a.goodsId ", condition.getParas());
 
         List<Integer> countList = Lists.newArrayList();
         List<String[]> list = new ArrayList<>();
